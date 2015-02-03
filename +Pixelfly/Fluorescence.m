@@ -19,6 +19,18 @@ classdef Fluorescence < handle
         
     end
     
+    properties % GUI
+        
+        dpg
+        
+    end
+    
+    properties
+        
+        pic_props % pictures properties
+        
+    end
+    
     properties
        
         parent % parent Data class

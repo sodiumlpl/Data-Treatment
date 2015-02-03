@@ -47,19 +47,11 @@ classdef Data < handle
                             
                             obj.pics.parent = obj;
                             
-                            % Show pictures
-                            
-                            obj.pics.show();
-                            
                         case 'fluo_1pix'
                             
                             obj.pics = Pixelfly.Fluo_1pix(pics_path);
                             
                             obj.pics.parent = obj;
-                            
-                            % Show pictures
-                            
-                            obj.pics.show();
 
                     end
                     

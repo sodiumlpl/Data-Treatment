@@ -25,8 +25,6 @@ classdef Treatment < handle
         
         running
         
-        chk_pix_timer
-        
     end
     
     properties % camera & treatment
@@ -40,6 +38,8 @@ classdef Treatment < handle
     properties
         
         data_array
+        
+        tmp_data
         
     end
     
@@ -581,8 +581,6 @@ classdef Treatment < handle
                     
                     % initialize and start sequence
                     
-                    %start(obj.chk_pix_timer);
-                    
                     set(obj.tmg.but1_1,'BackgroundColor',[1.0,0.0,0.0]);
                     
                     obj.running = 1;
@@ -590,8 +588,6 @@ classdef Treatment < handle
                 case 1
                     
                     % stop sequence
-                    
-                    %stop(obj.chk_pix_timer);
                     
                     set(obj.tmg.but1_1,'BackgroundColor',[0.0,1.0,0.0]);
                     
@@ -905,11 +901,35 @@ classdef Treatment < handle
                                 
                                 obj.data_array = Data.Data(obj.camera_type,obj.treatment_type,new_data_dir_path);
                                 
+                                if isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
+                                    
+                                    obj.data_array.dpg = obj.tmp_data.dpg;
+                                    
+                                    obj.data_array.pic_props = obj.tmp_data.pic_props;
+                                    
+                                end
+                                
+                                obj.tmp_data = obj.data_array;
+                                
+                                obj.data_array.pics.show;
+                                
                                 obj.data_array.save;
                                 
                             else
                                 
                                 obj.data_array(end+1) = Data.Data(obj.camera_type,obj.treatment_type,new_data_dir_path);
+                                
+                                if isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
+                                    
+                                    obj.data_array(end).dpg = obj.tmp_data.dpg;
+                                    
+                                    obj.data_array(end).pic_props = obj.tmp_data.pic_props;
+                                    
+                                end
+                                
+                                obj.tmp_data = obj.data_array(end);
+                                
+                                obj.data_array(end).pics.show;
                                 
                                 obj.data_array(end).save;
                                 
@@ -926,9 +946,19 @@ classdef Treatment < handle
                                 
                                 movefile([raw_data_dir_path,'\*'],tmp_data_dir_path);
                                 
-                                tmp_data = Data.Data(obj.camera_type,obj.treatment_type,tmp_data_dir_path);
+                                tmp_data_new = Data.Data(obj.camera_type,obj.treatment_type,tmp_data_dir_path);
                                 
-                                tmp_data.pics.show;
+                                if isequal(obj.tmp_data.camera_type,tmp_data_new.camera_type)&&isequal(obj.tmp_data.treatment_type,tmp_data_new.treatment_type)
+                                    
+                                    tmp_data_new.dpg = obj.tmp_data.dpg;
+                                                                    
+                                    tmp_data_new.pic_props = obj.tmp_data.pic_props;
+                                    
+                                end
+                                
+                                obj.tmp_data = tmp_data_new;
+                                
+                                obj.tmp_data.pics.show;
                                 
                             else
                                 
@@ -986,11 +1016,35 @@ classdef Treatment < handle
                                     
                                     obj.data_array = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                     
+                                    if isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
+                                        
+                                        obj.data_array.dpg = obj.tmp_data.dpg;
+                                      
+                                        obj.data_array.pic_props = obj.tmp_data.pic_props;
+                                        
+                                    end
+                                    
+                                    obj.tmp_data = obj.data_array;
+                                    
+                                    obj.data_array.pics.show;
+                                    
                                     obj.data_array.save;
                                     
                                 else
                                     
                                     obj.data_array(end+1) = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
+                                    
+                                    if isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
+                                                                                
+                                        obj.data_array(end).dpg = obj.tmp_data.dpg;
+                                        
+                                        obj.data_array(end).pic_props = obj.tmp_data.pic_props;
+                                        
+                                    end
+                                    
+                                    obj.tmp_data = obj.data_array(end);
+                                    
+                                    obj.data_array(end).pics.show;
                                     
                                     obj.data_array(end).save;
                                     
