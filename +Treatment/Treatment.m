@@ -683,19 +683,19 @@ classdef Treatment < handle
                 
                 if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
                     
-                    list_tmp = cellfun( @(x) obj.split_names(x),dir_names(3:end));
+                    tmp_names = dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Scan')));
+                    
+                    list_tmp = cellfun( @(x) obj.split_names(x),tmp_names);
                     
                     list_tmp = sort(list_tmp);
                     
-                    list_tmp = list_tmp(list_tmp>0);
-                    
-                    sorted_list = cell(1,length(list_tmp));
-                    
-                    if isequal(list_tmp(1),0)
-                       
+                    if ~isempty(dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Saved'))))
+                        
+                        sorted_list = cell(1,length(list_tmp)+1);
+                        
                         sorted_list{1} = 'Saved';
                         
-                        for i = 2:length(sorted_list)
+                         for i = 2:length(sorted_list)
                             
                             sorted_list{i} = ['Scan',num2str(list_tmp(i))];
                             
@@ -703,19 +703,21 @@ classdef Treatment < handle
                         
                     else
                         
-                        for i = 1:length(sorted_list)
+                        sorted_list = cell(1,length(list_tmp));
+                        
+                         for i = 1:length(sorted_list)
                             
                             sorted_list{i} = ['Scan',num2str(list_tmp(i))];
                             
                         end
                         
                     end
-                    
+
                     set(obj.tmg.lsb2_1,'String',sorted_list,'Value',1);
                     
                 end
                 
-                obj.current_data_dir = dir_names{3};
+                obj.current_data_dir = sorted_list{1};
                 
             else
                 
