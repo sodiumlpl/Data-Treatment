@@ -905,9 +905,9 @@ classdef Treatment < handle
                                 
                                 if isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
                                     
-                                    obj.data_array.dpg = obj.tmp_data.dpg;
+                                    obj.data_array.pics.dpg = obj.tmp_data.pics.dpg;
                                     
-                                    obj.data_array.pic_props = obj.tmp_data.pic_props;
+                                    obj.data_array.pics.pic_props = obj.tmp_data.pics.pic_props;
                                     
                                 end
                                 
@@ -923,9 +923,9 @@ classdef Treatment < handle
                                 
                                 if isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
                                     
-                                    obj.data_array(end).dpg = obj.tmp_data.dpg;
+                                    obj.data_array(end).pics.dpg = obj.tmp_data.pics.dpg;
                                     
-                                    obj.data_array(end).pic_props = obj.tmp_data.pic_props;
+                                    obj.data_array(end).pics.pic_props = obj.tmp_data.pics.pic_props;
                                     
                                 end
                                 
