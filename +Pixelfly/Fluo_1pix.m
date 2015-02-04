@@ -13,10 +13,6 @@ classdef Fluo_1pix < handle
         
         pic_at_bg
         
-    end
-    
-    properties
-        
         pic_cor
         
     end
@@ -55,12 +51,6 @@ classdef Fluo_1pix < handle
             obj = obj@handle;
             
             obj.pics_path=pics_path;
-            
-            if isempty(obj.pic_cor)
-                
-                obj.pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg));
-                
-            end
             
             % set default picture properties
             
@@ -970,21 +960,15 @@ classdef Fluo_1pix < handle
                     
                     case 'Corrected'
                         
-                        obj.pic_props(1).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                        
                         obj.disp_pic_cor;
                         
                     case 'Signal'
                         
-                        obj.pic_props(2).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                        
-                        obj.disp_pic_at;
+                        obj.disp_pic_sig;
                         
                     case 'Background'
                         
-                        obj.pic_props(3).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                        
-                        obj.disp_pic_at_bg;
+                        obj.disp_pic_bg;
                         
                 end
                 
@@ -1008,6 +992,24 @@ classdef Fluo_1pix < handle
             path = [obj.pics_path,'\pic_at_bg.mat'];
             
             load(path);
+            
+        end
+        
+        function pic_cor = get.pic_cor(obj)
+            
+            path = [obj.pics_path,'\pic_cor.mat'];
+            
+            try
+            
+            load(path);
+            
+            catch
+                
+                pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg));
+                
+                save(path,'pic_cor');
+                
+            end
             
         end
         

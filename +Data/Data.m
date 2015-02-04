@@ -43,7 +43,7 @@ classdef Data < handle
                         
                         case 'fluo_tof'
                             
-                            obj.pics = Pixelfly.Fluorescence(pics_path);
+                            obj.pics = Pixelfly.Fluo_tof(pics_path);
                             
                             obj.pics.parent = obj;
                             
