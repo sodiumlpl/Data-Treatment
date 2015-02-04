@@ -103,7 +103,7 @@ classdef Fluo_1pix < handle
                 obj.dpg.h = figure(...
                     'Name'                ,'Show pic Main' ...
                     ,'NumberTitle'        ,'off' ...
-                    ,'Position'           ,[2 144 1000 1000] ... %,'MenuBar'     ,'none'...
+                    ,'Position'           ,[7 116 1000 1000] ... %,'MenuBar'     ,'none'...
                     );
                 
                 %%% Camera & Treatment type panel %%%
@@ -302,7 +302,7 @@ classdef Fluo_1pix < handle
                 
                 c_ofs = 0.7;
                 r_ofs = 0.36;
-                c_wth = 0.08;
+                c_wth = 0.095;
                 r_wth = 0.02;
                 
                 obj.dpg.txt2_0 = uicontrol(...
@@ -402,7 +402,7 @@ classdef Fluo_1pix < handle
                 
                 c_ofs = 0.7;
                 r_ofs = 0.215;
-                c_wth = 0.12;
+                c_wth = 0.14;
                 r_wth = 0.02;
                 
                 obj.dpg.txt2_3 = uicontrol(...
@@ -561,10 +561,10 @@ classdef Fluo_1pix < handle
                 
                 % Text
                 
-                c_ofs = 0.255;
-                r_ofs = 0.475;
-                c_wth = 0.18;
-                r_wth = 0.14;
+                c_ofs = 0.185;
+                r_ofs = 0.425;
+                c_wth = 0.26;
+                r_wth = 0.235;
                 
                 obj.dpg.txt3_1 = uicontrol(...
                     'Parent'               ,obj.dpg.hsp3 ...
@@ -582,9 +582,9 @@ classdef Fluo_1pix < handle
                 % Text
                 
                 c_ofs = 0.455;
-                r_ofs = 0.475;
+                r_ofs = 0.425;
                 c_wth = 0.18;
-                r_wth = 0.14;
+                r_wth = 0.235;
                 
                 obj.dpg.txt3_2 = uicontrol(...
                     'Parent'               ,obj.dpg.hsp3 ...
@@ -828,7 +828,7 @@ classdef Fluo_1pix < handle
                     
                     axis(obj.dpg.ax2_1,'image')
                     
-                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace');
+                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -838,7 +838,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_2,'[counts]')
                     
-                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace');
+                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -848,7 +848,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_3,'[counts]')
                     
-                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace');
+                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace','FontSize',8);
                     
                     tot_sig = sum(cur_pic_roi(:));
                     
@@ -884,7 +884,7 @@ classdef Fluo_1pix < handle
                     
                     axis(obj.dpg.ax2_1,'image')
                     
-                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace');
+                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -894,7 +894,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_2,'[counts]')
                     
-                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace');
+                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -904,7 +904,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_3,'[counts]')
                     
-                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace');
+                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace','FontSize',8);
                     
                 case 'Background'
                     
@@ -936,7 +936,7 @@ classdef Fluo_1pix < handle
                     
                     axis(obj.dpg.ax2_1,'image')
                     
-                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace');
+                    set(obj.dpg.ax2_1,'Box','on','YAxisLocation','right','Tickdir','out','YDir','normal','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -946,7 +946,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_2,'[counts]')
                     
-                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace');
+                    set(obj.dpg.ax2_2,'Box','on','XTickLabel',[],'Tickdir','out','NextPlot','replace','FontSize',8);
                     
                     %%% disp picture
                     
@@ -956,7 +956,7 @@ classdef Fluo_1pix < handle
                     
                     ylabel(obj.dpg.ax2_3,'[counts]')
                     
-                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace');
+                    set(obj.dpg.ax2_3,'Box','on','XTickLabel',[],'Tickdir','out','View',[270 90],'YDir','reverse','NextPlot','replace','FontSize',8);
                     
             end
             
@@ -964,36 +964,40 @@ classdef Fluo_1pix < handle
         
         function postset_pic_props(obj,~,~)
             
-            switch obj.pic_type
+            if ~isempty(obj.pic_type)
                 
-                case 'Corrected'
+                switch obj.pic_type
                     
-                    obj.pic_props(1).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                    
-                    obj.disp_pic_cor;
-                    
-                case 'Signal'
-                    
-                    obj.pic_props(2).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                    
-                    obj.disp_pic_at;
-                    
-                case 'Background'
-                    
-                    obj.pic_props(3).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
-                    
-                    obj.disp_pic_at_bg;
-                    
+                    case 'Corrected'
+                        
+                        obj.pic_props(1).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
+                        
+                        obj.disp_pic_cor;
+                        
+                    case 'Signal'
+                        
+                        obj.pic_props(2).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
+                        
+                        obj.disp_pic_at;
+                        
+                    case 'Background'
+                        
+                        obj.pic_props(3).r_roi_ctr = str2double(get(obj.dpg.edt2_3,'String'));
+                        
+                        obj.disp_pic_at_bg;
+                        
+                end
+                
+                obj.postset_pic_type;
+                
             end
-            
-            obj.postset_pic_type;
             
         end
         
         
         function pic_at = get.pic_at(obj)
             
-            path = [obj.pics_path,'/pic_at.mat'];
+            path = [obj.pics_path,'\pic_at.mat'];
             
             load(path);
             
@@ -1001,7 +1005,7 @@ classdef Fluo_1pix < handle
         
         function pic_at_bg = get.pic_at_bg(obj)
             
-            path = [obj.pics_path,'/pic_at_bg.mat'];
+            path = [obj.pics_path,'\pic_at_bg.mat'];
             
             load(path);
             

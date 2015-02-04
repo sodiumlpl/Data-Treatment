@@ -97,7 +97,7 @@ classdef Default_parameters
         Axes_Units = 'normalized';
         
         Axes_FontName = 'Helvetica';
-        Axes_FontSize = 9;
+        Axes_FontSize = 8;
         Axes_FontUnits = 'points';
         Axes_FontWeight = 'normal';
         

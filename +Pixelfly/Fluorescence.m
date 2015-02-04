@@ -148,7 +148,7 @@ classdef Fluorescence < handle
             set(ax_fluo_img_wat_bg,'YDir','normal');
             
             imagesc(obj.pic_cor,'Parent',ax_fluo_img_cor);
-            caxis(ax_fluo_img_cor,[0 400]);
+            caxis(ax_fluo_img_cor,[-20 400]);
             colorbar('peer',ax_fluo_img_cor);
             axis(ax_fluo_img_cor,'image')
             set(ax_fluo_img_cor,'YDir','normal');
@@ -170,7 +170,7 @@ classdef Fluorescence < handle
         
         function fpic_cor = get_pic_cor(obj)
             
-            fpic_cor = (obj.pic_at - obj.pic_at_bg) - (obj.pic_wat - obj.pic_wat_bg);
+            fpic_cor = (double(obj.pic_at) - double(obj.pic_at_bg)) - (double(obj.pic_wat) - double(obj.pic_wat_bg));
             
         end
         

@@ -948,11 +948,11 @@ classdef Treatment < handle
                                 
                                 tmp_data_new = Data.Data(obj.camera_type,obj.treatment_type,tmp_data_dir_path);
                                 
-                                if isequal(obj.tmp_data.camera_type,tmp_data_new.camera_type)&&isequal(obj.tmp_data.treatment_type,tmp_data_new.treatment_type)
+                                if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,tmp_data_new.camera_type)&&isequal(obj.tmp_data.treatment_type,tmp_data_new.treatment_type)
                                     
-                                    tmp_data_new.dpg = obj.tmp_data.dpg;
+                                    tmp_data_new.pics.dpg = obj.tmp_data.pics.dpg;
                                                                     
-                                    tmp_data_new.pic_props = obj.tmp_data.pic_props;
+                                    tmp_data_new.pics.pic_props = obj.tmp_data.pics.pic_props;
                                     
                                 end
                                 
@@ -1016,11 +1016,11 @@ classdef Treatment < handle
                                     
                                     obj.data_array = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                     
-                                    if isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
+                                    if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
                                         
-                                        obj.data_array.dpg = obj.tmp_data.dpg;
+                                        obj.data_array.pics.dpg = obj.tmp_data.pics.dpg;
                                       
-                                        obj.data_array.pic_props = obj.tmp_data.pic_props;
+                                        obj.data_array.pics.pic_props = obj.tmp_data.pics.pic_props;
                                         
                                     end
                                     
@@ -1034,11 +1034,11 @@ classdef Treatment < handle
                                     
                                     obj.data_array(end+1) = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                     
-                                    if isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
+                                    if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
                                                                                 
-                                        obj.data_array(end).dpg = obj.tmp_data.dpg;
+                                        obj.data_array(end).pics.dpg = obj.tmp_data.pics.dpg;
                                         
-                                        obj.data_array(end).pic_props = obj.tmp_data.pic_props;
+                                        obj.data_array(end).pics.pic_props = obj.tmp_data.pics.pic_props;
                                         
                                     end
                                     

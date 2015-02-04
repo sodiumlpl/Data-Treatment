@@ -170,7 +170,7 @@ classdef Fluo_tof < handle
         
         function fpic_cor = get_pic_cor(obj)
             
-            fpic_cor = (obj.pic_at - obj.pic_at_bg) - (obj.pic_wat - obj.pic_wat_bg);
+            fpic_cor = (double(obj.pic_at) - double(obj.pic_at_bg)) - (double(obj.pic_wat) - double(obj.pic_wat_bg));
             
         end
         
