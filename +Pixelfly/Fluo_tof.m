@@ -31,6 +31,14 @@ classdef Fluo_tof < handle
         
     end
     
+    properties % listeners
+       
+        lst_pic_type
+        
+        lst_pic_props
+        
+    end
+    
     properties % pics size
         
         r_size = [1 1392];
@@ -112,22 +120,22 @@ classdef Fluo_tof < handle
             
             % initialize listeners
             
-            addlistener(obj,'pic_type','PostSet',@obj.postset_pic_type);
+            obj.lst_pic_type = addlistener(obj,'pic_type','PostSet',@obj.postset_pic_type);
             
-            addlistener(obj,'pic_props','PostSet',@obj.postset_pic_props);
+            obj.lst_pic_props = addlistener(obj,'pic_props','PostSet',@obj.postset_pic_props);
             
         end
         
         function show(obj)
             
-            if isempty(obj.dpg)
+            if isempty(obj.dpg)||~ishandle(obj.dpg.h)
                 
                 % initialize Show GUI
                 
                 obj.dpg.h = figure(...
                     'Name'                ,'Show pic Main' ...
                     ,'NumberTitle'        ,'off' ...
-                    ,'Position'           ,[7 116 1000 1000] ... %,'MenuBar'     ,'none'...
+                    ,'Position'           ,[322 116 1000 1000] ... %,'MenuBar'     ,'none'...
                     );
                 
                 %%% Camera & Treatment type panel %%%
@@ -1480,6 +1488,32 @@ classdef Fluo_tof < handle
         function pic_bg = get.pic_bg(obj)
             
             pic_bg = (double(obj.pic_wat) - double(obj.pic_wat_bg));
+            
+        end
+        
+        function a = saveobj(obj)
+            
+            a = obj;
+            
+            a.lst_pic_type = [];
+            
+            a.lst_pic_props = [];
+            
+            a.dpg = [];
+            
+        end
+        
+    end
+    
+    methods (Static = true)
+        
+        function obj = loadobj(a)
+            
+            a.lst_pic_type = addlistener(a,'pic_type','PostSet',@a.postset_pic_type);
+            
+            a.lst_pic_props = addlistener(a,'pic_props','PostSet',@a.postset_pic_props);
+            
+            obj = a;  % return the updated object
             
         end
         
