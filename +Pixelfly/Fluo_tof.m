@@ -23,6 +23,15 @@ classdef Fluo_tof < handle
         
     end
     
+    properties
+        
+        tmp_pic_cor
+        
+        tmp_pic_sig
+        tmp_pic_bg
+        
+    end
+    
     properties (SetObservable = true)
         
         pic_type
@@ -737,6 +746,28 @@ classdef Fluo_tof < handle
             obj.disp_pic_bg;
             
             obj.pic_type = 'Corrected';
+            
+        end
+        
+        function reset_clb(obj)
+            
+            set(obj.dpg.hsp1_1,'ButtonDownFcn',@obj.dpg_hsp1_1_clb)
+            
+            set(obj.dpg.hsp1_2,'ButtonDownFcn',@obj.dpg_hsp1_2_clb)
+            
+            set(obj.dpg.hsp1_2_1,'ButtonDownFcn',@obj.dpg_hsp1_2_1_clb)
+            set(obj.dpg.hsp1_2_2,'ButtonDownFcn',@obj.dpg_hsp1_2_1_clb)
+            
+            set(obj.dpg.hsp1_3,'ButtonDownFcn',@obj.dpg_hsp1_3_clb)
+            
+            set(obj.dpg.hsp1_3_1,'ButtonDownFcn',@obj.dpg_hsp1_3_1_clb)
+            set(obj.dpg.hsp1_3_2,'ButtonDownFcn',@obj.dpg_hsp1_3_1_clb)
+            
+            set(obj.dpg.edt2_1,'Callback',@obj.dpg_edt2_1_clb)
+            set(obj.dpg.edt2_2,'Callback',@obj.dpg_edt2_2_clb)
+            set(obj.dpg.edt2_3,'Callback',@obj.dpg_edt2_3_clb)
+            set(obj.dpg.edt2_4,'Callback',@obj.dpg_edt2_4_clb)
+            set(obj.dpg.edt2_5,'Callback',@obj.dpg_edt2_5_clb)
             
         end
         
@@ -1463,43 +1494,54 @@ classdef Fluo_tof < handle
         
         function pic_cor = get.pic_cor(obj)
             
-            path = [obj.pics_path,'/pic_cor.mat'];
-            
-            try
+            if isempty(obj.tmp_pic_cor)
                 
-                load(path);
-                
-            catch
-                
-                pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg)) - (double(obj.pic_wat) - double(obj.pic_wat_bg));
-                
-                save(path,'pic_cor');
+                obj.tmp_pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg)) - (double(obj.pic_wat) - double(obj.pic_wat_bg));
                 
             end
+            
+            pic_cor = obj.tmp_pic_cor;
             
         end
         
         function pic_sig = get.pic_sig(obj)
             
-            pic_sig = (double(obj.pic_at) - double(obj.pic_at_bg));
+            if isempty(obj.tmp_pic_sig)
+                
+                obj.tmp_pic_sig = (double(obj.pic_at) - double(obj.pic_at_bg));
+                
+            end
+            
+            pic_sig = obj.tmp_pic_sig;
             
         end
         
         function pic_bg = get.pic_bg(obj)
             
-            pic_bg = (double(obj.pic_wat) - double(obj.pic_wat_bg));
+            if isempty(obj.tmp_pic_bg)
+                
+                obj.tmp_pic_bg = (double(obj.pic_wat) - double(obj.pic_wat_bg));
+                
+            end
+            
+            pic_bg = obj.tmp_pic_bg;
             
         end
         
-        function a = saveobj(obj)
+        function pic = saveobj(obj)
             
-            a = obj;
+            pic = obj;
             
-            a.lst_pic_type = [];
+            pic.lst_pic_type = [];
             
-            a.lst_pic_props = [];
+            pic.lst_pic_props = [];
             
-            a.dpg = [];
+            pic.dpg = [];
+            
+            pic.tmp_pic_cor = [];
+            
+            pic.tmp_pic_sig = [];
+            pic.tmp_pic_bg = [];
             
         end
         
@@ -1507,13 +1549,13 @@ classdef Fluo_tof < handle
     
     methods (Static = true)
         
-        function obj = loadobj(a)
+        function obj = loadobj(pic)
             
-            a.lst_pic_type = addlistener(a,'pic_type','PostSet',@a.postset_pic_type);
+            pic.lst_pic_type = addlistener(pic,'pic_type','PostSet',@pic.postset_pic_type);
             
-            a.lst_pic_props = addlistener(a,'pic_props','PostSet',@a.postset_pic_props);
+            pic.lst_pic_props = addlistener(pic,'pic_props','PostSet',@pic.postset_pic_props);
             
-            obj = a;  % return the updated object
+            obj = pic;  % return the updated object
             
         end
         

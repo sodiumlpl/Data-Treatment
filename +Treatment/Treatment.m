@@ -5,6 +5,10 @@ classdef Treatment < handle
         
         tmg % treatment main GUI
         
+        gog % global observe GUI
+        
+        osg % observe scan GUI
+        
     end
     
     properties (SetObservable = true) % general
@@ -19,19 +23,14 @@ classdef Treatment < handle
         
         current_data_dir
         
+        camera_type
+        treatment_type
+        
     end
     
     properties
         
-        running
-        
-    end
-    
-    properties % camera & treatment
-        
-        camera_type
-        
-        treatment_type
+        tmp_dir_path
         
     end
     
@@ -39,7 +38,15 @@ classdef Treatment < handle
         
         data_array
         
-        tmp_data
+        current_data
+        
+    end
+    
+    properties (SetObservable = true)
+        
+        glob_obs
+        
+        scan_obs
         
     end
     
@@ -101,15 +108,18 @@ classdef Treatment < handle
             
             addlistener(obj,'data_path','PostSet',@obj.postset_data_path);
             
+            addlistener(obj,'current_data_dir','PreSet',@obj.preset_current_data_dir);
             addlistener(obj,'current_data_dir','PostSet',@obj.postset_current_data_dir);
-            
-            obj.running = 0;
             
             % set default camera and treatment
             
-            obj.camera_type = Treatment.Default_parameters.camera_type;
+            addlistener(obj,'camera_type','PostSet',@obj.postset_camera_type);
+            addlistener(obj,'treatment_type','PostSet',@obj.postset_treatment_type);
             
-            obj.treatment_type = Treatment.Default_parameters.treatment_type;
+            % create observers listeners
+            
+            addlistener(obj,'glob_obs','PostSet',@obj.post_set_glob_obs);
+            addlistener(obj,'scan_obs','PostSet',@obj.post_set_scan_obs);
             
         end
         
@@ -180,12 +190,11 @@ classdef Treatment < handle
             
             obj.tmg.lsb1_1 = uicontrol(...
                 'Parent'               ,obj.tmg.hsp1 ...
-                ,'Style'                ,'listbox' ...
-                ,'Units'                , Treatment.Default_parameters.Listbox_Units ...
-                ,'String'               , {cell_tmp.type} ...
-                ,'Value'                , find(strcmp({cell_tmp.type},Treatment.Default_parameters.camera_type)) ...
-                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
-                ,'Callback'             ,@obj.tmg_lsb1_1_clb ...
+                ,'Style'               ,'listbox' ...
+                ,'Units'               , Treatment.Default_parameters.Listbox_Units ...
+                ,'String'              , {cell_tmp.type} ...
+                ,'Position'            ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Enable'              ,'off' ...
                 );
             
             % Text
@@ -221,12 +230,11 @@ classdef Treatment < handle
             
             obj.tmg.lsb1_2 = uicontrol(...
                 'Parent'               ,obj.tmg.hsp1 ...
-                ,'Style'                ,'listbox' ...
-                ,'Units'                , Treatment.Default_parameters.Listbox_Units ...
-                ,'String'               , {cell_tmp.type} ...
-                ,'Value'                ,find(strcmp({cell_tmp.type},Treatment.Default_parameters.treatment_type)) ...
-                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
-                ,'Callback'             ,@obj.tmg_lsb1_2_clb ...
+                ,'Style'               ,'listbox' ...
+                ,'Units'               , Treatment.Default_parameters.Listbox_Units ...
+                ,'String'              , {cell_tmp.type} ...
+                ,'Position'            ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Enable'              ,'off' ...
                 );
             
             %%% Data path panel %%%
@@ -547,53 +555,130 @@ classdef Treatment < handle
                 ,'Callback'             ,@obj.tmg_lsb3_1_clb ...
                 );
             
+            % initialize Global Observe GUI
+            
+            obj.gog.h = figure(...
+                'Name'                ,'Global observe' ...
+                ,'NumberTitle'        ,'off' ...
+                ,'Position'           ,[1340 50 570 450] ... %,'MenuBar'     ,'none'...
+                );
+            
+            %%% main panel %%%
+            
+            c_ofs = 0.0025;
+            r_ofs = 0.0025;
+            c_wth = 0.995;
+            r_wth = 0.995;
+            
+            obj.gog.hsp = uipanel(...
+                'Parent'              ,obj.gog.h ...
+                ,'BackgroundColor'    ,Treatment.Default_parameters.Panel_BackgroundColor ...
+                ,'ForegroundColor'    ,Treatment.Default_parameters.Panel_ForegroundColor ...
+                ,'HighlightColor'     ,Treatment.Default_parameters.Panel_HighlightColor ...
+                ,'ShadowColor'        ,Treatment.Default_parameters.Panel_ShadowColor ...
+                ,'FontName'           ,Treatment.Default_parameters.Panel_FontName ...
+                ,'FontSize'           ,Treatment.Default_parameters.Panel_FontSize ...
+                ,'FontUnits'          ,Treatment.Default_parameters.Panel_FontUnits ...
+                ,'FontWeight'         ,Treatment.Default_parameters.Panel_FontWeight ...
+                ,'SelectionHighlight' ,Treatment.Default_parameters.Panel_SelectionHighlight ...
+                ,'Units'              ,Treatment.Default_parameters.Panel_Units ...
+                ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            c_ofs = 0.1;
+            r_ofs = 0.28;
+            c_wth = 0.825;
+            r_wth = 0.66;
+            
+            obj.gog.ax = axes(...
+                'Parent'             ,obj.gog.hsp ...
+                ,'Units'              ,Treatment.Default_parameters.Axes_Units ...
+                ,'Box'                ,'on' ...
+                ,'Tickdir'            ,'out' ...
+                ,'NextPlot'           ,'replace'...
+                ,'FontSize'           ,8 ...
+                ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % Text
+            
+            c_ofs = 0.185;
+            r_ofs = 0.155;
+            c_wth = 0.08;
+            r_wth = 0.025;
+            
+            obj.gog.txt1 = uicontrol(...
+                'Parent'               ,obj.gog.hsp ...
+                ,'Style'                ,'text' ...
+                ,'String'               ,'y axis :' ...
+                ,'FontName'             ,Treatment.Default_parameters.Text_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Text_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Text_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Text_FontWeight ...
+                ,'HorizontalAlignment'  ,'left' ...
+                ,'Units'                ,Treatment.Default_parameters.Text_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % pop-up
+            
+            c_ofs = 0.18;
+            r_ofs = 0.08;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.gog.pum1 = uicontrol(...
+                'Parent'               ,obj.gog.hsp ...
+                ,'Style'                ,'popupmenu' ...
+                ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
+                ,'FontName'             ,Treatment.Default_parameters.Popup_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
+                ,'String'               ,'none' ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.gog_pum1_clb ...
+                ,'Enable'               ,'off' ...
+                );
+            
+            % pushbutton 2_1 geometry
+            
+            c_ofs = 0.5;
+            r_ofs = 0.08;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.gog.but1 = uicontrol(...
+                'Parent'                ,obj.gog.hsp ...
+                ,'Style'                ,'pushbutton' ...
+                ,'String'               ,'Reset' ...
+                ,'FontName'             ,Treatment.Default_parameters.Pushbutton_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Pushbutton_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Pushbutton_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Pushbutton_FontWeight ...
+                ,'Units'                ,Treatment.Default_parameters.Pushbutton_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.gog_but1_clb ...
+                );
+            
+            
+            % update path directory
+                        
             obj.update_dir_path;
             
         end
         
-        function tmg_lsb1_1_clb(obj,~,~)
+        function gog_pum1_clb(obj,~,~)
             
-            ind = get(obj.tmg.lsb1_1,'Value');
+            list_y_axis = get(obj.gog.pum1,'String');
             
-            list = {Treatment.Default_parameters.camera_struct.type};
-            
-            obj.camera_type = list{ind};
-
-        end
-        
-        function tmg_lsb1_2_clb(obj,~,~)
-            
-            ind = get(obj.tmg.lsb1_2,'Value');
-            
-            tmp_struct = Treatment.Default_parameters.treatment_struct;
-            
-            list = {tmp_struct.type};
-            
-            obj.treatment_type = list{ind};
+            obj.glob_obs.y_axis = list_y_axis{get(obj.gog.pum1,'Value')};
             
         end
         
-        function check_new_pics(obj,~,~)
+        function gog_but1_clb(obj,~,~)
             
-            switch obj.running
-                
-                case 0
-                    
-                    % initialize and start sequence
-                    
-                    set(obj.tmg.but1_1,'BackgroundColor',[1.0,0.0,0.0]);
-                    
-                    obj.running = 1;
-                    
-                case 1
-                    
-                    % stop sequence
-                    
-                    set(obj.tmg.but1_1,'BackgroundColor',[0.0,1.0,0.0]);
-                    
-                    obj.running = 0;
-                    
-            end
+            obj.glob_obs.values = [];
             
         end
         
@@ -667,19 +752,21 @@ classdef Treatment < handle
             
             ind = get(obj.tmg.lsb3_1,'Value');
             
-            if ~isempty(obj.tmp_data)
+            if ~isempty(obj.current_data)
                 
-                if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                     
-                    if isequal(obj.tmp_data.camera_type,obj.data_array(ind).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(ind).treatment_type)
+                    if isequal(obj.current_data.camera_type,obj.data_array(ind).camera_type)&&isequal(obj.current_data.treatment_type,obj.data_array(ind).treatment_type)
                         
-                        obj.data_array(ind).pics.dpg = obj.tmp_data.pics.dpg;
+                        obj.data_array(ind).pics.dpg = obj.current_data.pics.dpg;
                         
-                        obj.data_array(ind).pics.pic_props = obj.tmp_data.pics.pic_props;
+                        obj.data_array(ind).pics.pic_props = obj.current_data.pics.pic_props;
+                        
+                        obj.data_array(ind).pics.reset_clb;
                         
                     else
                         
-                        close(obj.tmp_data.pics.dpg.h)
+                        close(obj.current_data.pics.dpg.h)
                         
                     end
                     
@@ -687,9 +774,13 @@ classdef Treatment < handle
                 
             end
             
-            obj.tmp_data = obj.data_array(ind);
-            
             obj.data_array(ind).pics.show;
+          
+            obj.current_data = obj.data_array(ind);
+            
+            obj.camera_type = obj.data_array(ind).camera_type;
+            
+            obj.treatment_type = obj.data_array(ind).treatment_type;
             
         end
         
@@ -697,61 +788,214 @@ classdef Treatment < handle
             
             path = [obj.data_path,'\',obj.year,'\',obj.month,'\',obj.day];
             
-            dir_struct = dir(path);
-            
-            dir_names = {dir_struct.name};
-            
-            if length(dir_names)>2
+            if isempty(obj.tmp_dir_path)||~strcmp(obj.tmp_dir_path,path)
                 
-                if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
+                obj.tmp_dir_path = path;
+                
+                dir_struct = dir(path);
+                
+                dir_names = {dir_struct.name};
+                
+                if length(dir_names)>2
                     
-                    tmp_names = dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Scan')));
-                    
-                    list_tmp = cellfun( @(x) obj.split_names(x),tmp_names);
-                    
-                    list_tmp = sort(list_tmp);
-                    
-                    if ~isempty(dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Saved'))))
+                    if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
                         
-                        sorted_list = cell(1,length(list_tmp)+1);
+                        tmp_names = dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Scan')));
                         
-                        sorted_list{1} = 'Saved';
+                        list_tmp = cellfun( @(x) obj.split_names(x),tmp_names);
                         
-                         for i = 2:length(sorted_list)
+                        list_tmp = sort(list_tmp);
+                        
+                        if ~isempty(dir_names(cellfun(@(x) ~isempty(x),regexp(dir_names,'Saved'))))
                             
-                            sorted_list{i} = ['Scan',num2str(list_tmp(i))];
+                            sorted_list = cell(1,length(list_tmp)+1);
+                            
+                            sorted_list{1} = 'Saved';
+                            
+                            for i = 2:length(sorted_list)
+                                
+                                sorted_list{i} = ['Scan',num2str(list_tmp(i))];
+                                
+                            end
+                            
+                        else
+                            
+                            sorted_list = cell(1,length(list_tmp));
+                            
+                            for i = 1:length(sorted_list)
+                                
+                                sorted_list{i} = ['Scan',num2str(list_tmp(i))];
+                                
+                            end
                             
                         end
                         
-                    else
-                        
-                        sorted_list = cell(1,length(list_tmp));
-                        
-                         for i = 1:length(sorted_list)
-                            
-                            sorted_list{i} = ['Scan',num2str(list_tmp(i))];
-                            
-                        end
+                        set(obj.tmg.lsb2_1,'String',sorted_list,'Value',1);
                         
                     end
-
-                    set(obj.tmg.lsb2_1,'String',sorted_list,'Value',1);
+                    
+                    obj.current_data_dir = sorted_list{1};
+                    
+                else
+                    
+                    if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
+                        
+                        set(obj.tmg.lsb2_1,'String','');
+                        
+                    end
+                    
+                    obj.current_data_dir = [];
                     
                 end
-                
-                obj.current_data_dir = sorted_list{1};
-                
-            else
-                
-                if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
-                    
-                    set(obj.tmg.lsb2_1,'String','');
-                    
-                end
-                
-                obj.current_data_dir = [];
                 
             end
+            
+        end
+        
+        function observe_scans_gui(obj)
+            
+            % initialize Observe GUI
+            
+            obj.osg.h = figure(...
+                'Name'                ,'Observe scans' ...
+                ,'NumberTitle'        ,'off' ...
+                ,'Position'           ,[1340 670 570 450] ... %,'MenuBar'     ,'none'...
+                );
+            
+            %%% main panel %%%
+            
+            c_ofs = 0.0025;
+            r_ofs = 0.0025;
+            c_wth = 0.995;
+            r_wth = 0.995;
+            
+            obj.osg.hsp = uipanel(...
+                'Parent'              ,obj.osg.h ...
+                ,'BackgroundColor'    ,Treatment.Default_parameters.Panel_BackgroundColor ...
+                ,'ForegroundColor'    ,Treatment.Default_parameters.Panel_ForegroundColor ...
+                ,'HighlightColor'     ,Treatment.Default_parameters.Panel_HighlightColor ...
+                ,'ShadowColor'        ,Treatment.Default_parameters.Panel_ShadowColor ...
+                ,'FontName'           ,Treatment.Default_parameters.Panel_FontName ...
+                ,'FontSize'           ,Treatment.Default_parameters.Panel_FontSize ...
+                ,'FontUnits'          ,Treatment.Default_parameters.Panel_FontUnits ...
+                ,'FontWeight'         ,Treatment.Default_parameters.Panel_FontWeight ...
+                ,'SelectionHighlight' ,Treatment.Default_parameters.Panel_SelectionHighlight ...
+                ,'Units'              ,Treatment.Default_parameters.Panel_Units ...
+                ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            c_ofs = 0.1;
+            r_ofs = 0.28;
+            c_wth = 0.825;
+            r_wth = 0.66;
+            
+            obj.osg.ax = axes(...
+                'Parent'             ,obj.osg.hsp ...
+                ,'Units'              ,Treatment.Default_parameters.Axes_Units ...
+                ,'Box'                ,'on' ...
+                ,'Tickdir'            ,'out' ...
+                ,'NextPlot'           ,'replace'...
+                ,'FontSize'           ,8 ...
+                ,'Position'           ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % Text
+            
+            c_ofs = 0.185;
+            r_ofs = 0.155;
+            c_wth = 0.08;
+            r_wth = 0.025;
+            
+            obj.osg.txt1 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'text' ...
+                ,'String'               ,'x axis :' ...
+                ,'FontName'             ,Treatment.Default_parameters.Text_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Text_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Text_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Text_FontWeight ...
+                ,'HorizontalAlignment'  ,'left' ...
+                ,'Units'                ,Treatment.Default_parameters.Text_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % pop-up
+            
+            c_ofs = 0.18;
+            r_ofs = 0.08;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.osg.pum1 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'popupmenu' ...
+                ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
+                ,'FontName'             ,Treatment.Default_parameters.Popup_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
+                ,'String'               ,'none' ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.osg_pum1_clb ...
+                ,'Enable'               ,'off' ...
+                );
+            
+            % Text
+            
+            c_ofs = 0.455;
+            r_ofs = 0.155;
+            c_wth = 0.08;
+            r_wth = 0.025;
+            
+            obj.osg.txt2 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'text' ...
+                ,'String'               ,'y axis :' ...
+                ,'FontName'             ,Treatment.Default_parameters.Text_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Text_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Text_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Text_FontWeight ...
+                ,'HorizontalAlignment'  ,'left' ...
+                ,'Units'                ,Treatment.Default_parameters.Text_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % pop-up
+            
+            c_ofs = 0.455;
+            r_ofs = 0.085;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.osg.pum2 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'popupmenu' ...
+                ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
+                ,'FontName'             ,Treatment.Default_parameters.Popup_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
+                ,'String'               ,'none' ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.osg_pum2_clb ...
+                ,'Enable'               ,'off' ...
+                );
+            
+        end
+        
+        function osg_pum1_clb(obj,~,~)
+            
+            list_x_axis = get(obj.osg.pum1,'String');
+            
+            obj.scan_obs.x_axis = list_x_axis{get(obj.osg.pum1,'Value')};
+            
+        end
+        
+        function osg_pum2_clb(obj,~,~)
+            
+            list_y_axis = get(obj.osg.pum1,'String');
+            
+            obj.scan_obs.y_axis = list_y_axis{get(obj.osg.pum1,'Value')};
             
         end
         
@@ -800,6 +1044,36 @@ classdef Treatment < handle
             end
             
             obj.update_dir_path;
+        end
+        
+        function preset_current_data_dir(obj,~,~)
+            
+            if ~isempty(obj.current_data)
+                
+                tmp_dpg = obj.current_data.pics.dpg;
+                
+            end
+            
+            % Before changing the current data directory, save the data in
+            % the data array if it is not empty
+            
+            if ~isempty(obj.data_array)
+                
+                for i = 1:length(obj.data_array)
+                    
+                    obj.data_array(i).save;
+                    
+                    disp(['Pic number ',num2str(i),' saved !'])
+                    
+                end
+                
+            end
+            
+            if ~isempty(obj.current_data)
+                
+                obj.current_data.pics.dpg = tmp_dpg;
+                
+            end
             
         end
         
@@ -807,11 +1081,17 @@ classdef Treatment < handle
             
             if ~isempty(obj.current_data_dir)
                 
+                % If the current data directory is not empty...
+                
                 if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
+                    
+                    % Check if the Treatment main GUI exists and set the listbox to the current data directory 
                     
                     set(obj.tmg.lsb2_1,'Value',find(strcmp(get(obj.tmg.lsb2_1,'String'),obj.current_data_dir)));
                     
                 end
+                
+                % Get the name of the files in the current data directory
                 
                 path = strcat(obj.data_path,'\',obj.year,'\',obj.month,'\',obj.day,'\',obj.current_data_dir);
                 
@@ -821,6 +1101,9 @@ classdef Treatment < handle
                 
                 if length(dir_names)>2
                     
+                    % If the current data directory is not empty load the
+                    % data in the data array
+                    
                     if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
                         
                         set(obj.tmg.lsb3_1,'String',cellfun(@(x) num2str(x),num2cell(sort(str2double(dir_names(3:end)))),'UniformOutput',0),'Value',1);
@@ -829,19 +1112,103 @@ classdef Treatment < handle
                     
                     % fill data_array
                     
-                    load([path,'\1\data.m'],'-mat');
-                    
-                    obj.data_array = data;
-                    
-                    for i=2:length(get(obj.tmg.lsb3_1,'String'))
+                    try
                         
-                        load([path,'\',num2str(i),'\data.m'],'-mat');
+                        load([path,'\1\data.mat']);
                         
-                        obj.data_array(i) = data;
+                    catch
+                        
+                        load([path,'\1\data.m'],'-mat');
+                        
+                        save([path,'\1\data.mat'],'data')
+                        delete([path,'\1\data.m'])
                         
                     end
                     
+                    obj.data_array = data;
+                    
+                    if strcmp(obj.current_data_dir(1:4),'Scan')
+                        
+                        if isempty(obj.osg)||~ishandle(obj.osg.h)
+                            
+                            obj.observe_scans_gui;
+                            
+                        end
+                        
+                        if ~isempty(obj.current_data)
+                            
+                            if ~isequal(obj.current_data.camera_type,obj.data_array.camera_type)||~isequal(obj.current_data.treatment_type,obj.data_array.treatment_type)||isempty(obj.scan_obs)
+                                
+                                obj.update_scan_obs_lists;
+                                
+                            end
+                            
+                        else
+                            
+                            obj.update_scan_obs_lists;
+                            
+                        end
+                        
+                    end
+                    
+                    % re-enable scan observe pop-up menu 
+                    
+                    set(obj.osg.pum1,'Enable','on')
+                    
+                    set(obj.osg.pum2,'Enable','on')
+                    
+                    % update scan observe
+                    
+                    if strcmp(obj.scan_obs.x_axis,'none')
+                        
+                        obj.data_array.scan_obs_x_axis_value = length(obj.data_array);
+                        
+                    end
+                   
+                    obj.data_array.scan_obs_x_axis = obj.scan_obs.x_axis;
+                    
+                    obj.data_array.scan_obs_y_axis = obj.scan_obs.y_axis;
+                    
+                    disp('Pic 1 reloaded !')
+                    
+                    for i=2:length(get(obj.tmg.lsb3_1,'String'))
+                        
+                        try
+                            
+                            load([path,'\',num2str(i),'\data.mat']);
+                            
+                        catch
+                            
+                            load([path,'\',num2str(i),'\data.m'],'-mat');
+                            
+                            save([path,'\',num2str(i),'\data.mat'],'data');
+                            delete([path,'\',num2str(i),'\data.m']);
+                            
+                        end
+                        
+                        obj.data_array(i) = data;
+                        
+                        % update scan observe
+                        
+                        obj.data_array(end).scan_obs_x_axis = obj.scan_obs.x_axis;
+                        
+                        if strcmp(obj.scan_obs.x_axis,'none')
+                            
+                            obj.data_array(end).scan_obs_x_axis_value = length(obj.data_array);
+                            
+                        end
+                        
+                        obj.data_array(i).scan_obs_y_axis = obj.scan_obs.y_axis;
+                        
+                        disp(['Pic ',num2str(i),' reloaded !'])
+                        
+                    end
+                    
+                    obj.post_set_scan_obs;
+                    
                 else
+                    
+                    % If the current data directory is empty...
                     
                     if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
                         
@@ -856,6 +1223,34 @@ classdef Treatment < handle
             end
             
         end
+                
+        function postset_camera_type(obj,~,~)
+            
+            if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
+                
+                tmp_struct = Treatment.Default_parameters.camera_struct;
+                
+                ind = find(strcmp(obj.camera_type,{tmp_struct.type}));
+                
+                set(obj.tmg.lsb1_1,'Value',ind);
+                
+            end
+            
+        end
+        
+        function postset_treatment_type(obj,~,~)
+            
+            if ~isempty(obj.tmg)&&ishandle(obj.tmg.h)
+                
+                tmp_struct = Treatment.Default_parameters.treatment_struct;
+                
+                ind = find(strcmp(obj.treatment_type,{tmp_struct.type}));
+                
+                set(obj.tmg.lsb1_2,'Value',ind);
+                
+            end
+            
+        end
         
         function execute(obj,name,message)
             
@@ -863,19 +1258,29 @@ classdef Treatment < handle
                 
                 case 'BEC009'
                     
-                    disp(['Received message : ',message])
+                    str_cell = strsplit(message,'-');
                     
-                    str_cell = strsplit(message,'_');
+                    obj.camera_type = str_cell{1};
                     
-                    raw_data_dir_path = Treatment.Default_parameters.camera_struct(strcmp({Treatment.Default_parameters.camera_struct.type},obj.camera_type)).data_path;
+                    obj.treatment_type = str_cell{2};
                     
-                    switch str_cell{1}
+                    tmp_struct = Treatment.Default_parameters.camera_struct;
+                    
+                    raw_data_dir_path = Treatment.Default_parameters.camera_struct(strcmp({tmp_struct.type},obj.camera_type)).data_path;
+                    
+                    switch str_cell{3}
                         
                         case 'scan'
                             
-                            scan_nbr = str2double(str_cell{2});
+                            if isempty(obj.osg)||~ishandle(obj.osg.h)
+                                
+                                obj.observe_scans_gui;
+                                
+                            end
                             
-                            pic_num = str2double(str_cell{4});
+                            scan_nbr = str2double(str_cell{4});
+                            
+                            pic_num = str2double(str_cell{6});
                             
                             scan_data_dir_path = [obj.data_path,'\',obj.year,'\',obj.month,'\',obj.day,'\Scan',num2str(scan_nbr)];
                             
@@ -904,12 +1309,24 @@ classdef Treatment < handle
                                 mkdir(scan_data_dir_path);
                                 
                                 obj.current_data_dir = ['Scan',num2str(scan_nbr)];
-                                
+ 
                             end
                             
                             mkdir(new_data_dir_path);
                             
                             movefile([raw_data_dir_path,'\*'],new_data_dir_path);
+                            
+                            if exist([obj.data_path,'\Tmp\params.mat'],'file')
+                                
+                                disp('Found params file !')
+                                
+                                movefile([obj.data_path,'\Tmp\params.mat'],new_data_dir_path);
+                                
+                            else
+                                
+                                disp('Params file not found !')
+                                
+                            end
                             
                             % update listbox data
                             
@@ -925,55 +1342,95 @@ classdef Treatment < handle
                                 
                                 obj.data_array = Data.Data(obj.camera_type,obj.treatment_type,new_data_dir_path);
                                 
-                                if ~isempty(obj.tmp_data)
+                                if ~isempty(obj.current_data)
                                     
-                                    if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                                    if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                                         
-                                        if isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
+                                        if isequal(obj.current_data.camera_type,obj.data_array.camera_type)&&isequal(obj.current_data.treatment_type,obj.data_array.treatment_type)
                                             
-                                            obj.data_array.pics.dpg = obj.tmp_data.pics.dpg;
+                                            obj.data_array.pics.dpg = obj.current_data.pics.dpg;
                                             
-                                            obj.data_array.pics.pic_props = obj.tmp_data.pics.pic_props;
+                                            obj.data_array.pics.pic_props = obj.current_data.pics.pic_props;
+                                            
+                                            obj.data_array.pics.reset_clb;
+                                            
+                                            % set scan observe parameters
+                                            
+                                            if isempty(obj.scan_obs)
+                                                
+                                                list_x_axis = get(obj.osg.pum1,'String') ;
+                                                
+                                                list_y_axis = get(obj.osg.pum2,'String');
+                                                
+                                                if iscell(list_x_axis)
+                                                    
+                                                    obj.scan_obs.x_axis = list_x_axis{1};
+                                                    
+                                                else
+                                                    
+                                                    obj.scan_obs.x_axis = list_x_axis;
+                                                    
+                                                end
+                                                
+                                                if iscell(list_y_axis)
+                                                    
+                                                    obj.scan_obs.y_axis = list_y_axis{1};
+                                                    
+                                                else
+                                                    
+                                                    obj.scan_obs.y_axis = list_y_axis;
+                                                    
+                                                end
+                                                
+                                            end
                                             
                                         else
                                             
-                                            close(obj.tmp_data.pics.dpg.h)
+                                            close(obj.current_data.pics.dpg.h)
+                                            
+                                            obj.update_scan_obs_lists;
                                             
                                         end
                                         
                                     end
                                     
+                                else
+                                    
+                                    obj.update_scan_obs_lists;
+                                    
+                                    set(obj.gog.pum1,'Enable','on')
+                                    
                                 end
+                                
+                                % re-enable pop-up menu
+                                
+                                set(obj.osg.pum1,'Enable','on')
+                                
+                                set(obj.osg.pum2,'Enable','on')
                                 
                                 obj.data_array.pics.show;
                                 
-                                tmp_dpg = obj.data_array.pics.dpg;
-                                
-                                obj.data_array.save;
-                                
-                                load([obj.data_array.pics_path,'\data.m'],'-mat');
-                           
-                                obj.tmp_data = data;
-                                
-                                obj.tmp_data.pics.dpg = tmp_dpg;
+                                obj.current_data = obj.data_array;
                                 
                             else
                                 
                                 obj.data_array(end+1) = Data.Data(obj.camera_type,obj.treatment_type,new_data_dir_path);
                                 
-                                if ~isempty(obj.tmp_data)
+                                if ~isempty(obj.current_data)
                                     
-                                    if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                                    if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                                         
-                                        if isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
+                                        if isequal(obj.current_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.current_data.treatment_type,obj.data_array(end).treatment_type)
                                             
-                                            obj.data_array(end).pics.dpg = obj.tmp_data.pics.dpg;
+                                            obj.data_array(end).pics.dpg = obj.current_data.pics.dpg;
                                             
-                                            obj.data_array(end).pics.pic_props = obj.tmp_data.pics.pic_props;
+                                            obj.data_array(end).pics.pic_props = obj.current_data.pics.pic_props;
                                             
+                                            obj.data_array(end).pics.reset_clb;
+
                                         else
                                             
-                                            close(obj.tmp_data.pics.dpg.h)
+                                            close(obj.current_data.pics.dpg.h)
                                             
                                         end
                                         
@@ -982,23 +1439,59 @@ classdef Treatment < handle
                                 end
                                 
                                 obj.data_array(end).pics.show;
+
+                                obj.current_data = obj.data_array(end);
                                 
-                                tmp_dpg = obj.data_array(end).pics.dpg;
+                            end
+                            
+                            % update scan observe
+                                                        
+                            obj.data_array(end).scan_obs_x_axis = obj.scan_obs.x_axis;
+                            
+                            if strcmp(obj.scan_obs.x_axis,'none')
                                 
-                                obj.data_array(end).save;
+                                obj.data_array(end).scan_obs_x_axis_value = length(obj.data_array);
                                 
-                                load([obj.data_array(end).pics_path,'\data.m'],'-mat');
-                           
-                                obj.tmp_data = data;
+                            end
+                            
+                            obj.data_array(end).scan_obs_y_axis = obj.scan_obs.y_axis;
+                            
+                            % update global observe
+                            
+                            obj.data_array(end).glob_obs_y_axis = obj.glob_obs.y_axis;
+                            
+                            if isfield(obj.glob_obs,'values')
                                 
-                                obj.tmp_data.pics.dpg = tmp_dpg;
+                                obj.glob_obs.values(end+1) = obj.data_array(end).glob_obs_y_axis_value;
+                                
+                            else
+                                
+                                obj.glob_obs.values = obj.data_array(end).glob_obs_y_axis_value;
                                 
                             end
                             
                             
                         case 'seq'
                             
-                            seq_nbr = str2double(str_cell{2});
+                            %%% disable scan obs
+                            
+                            if ~isempty(obj.osg)&&ishandle(obj.osg.h)
+                                
+                                % disable scan observe pop-up menu
+                                
+                                set(obj.osg.pum1,'Enable','on')
+                                
+                                set(obj.osg.pum2,'Enable','on')
+                                
+                                % close GUI
+                                
+                                close(obj.osg.h)
+                                
+                            end
+                            
+                            %%%
+                            
+                            seq_nbr = str2double(str_cell{4});
                             
                             if isequal(seq_nbr,0)
                                 
@@ -1008,23 +1501,97 @@ classdef Treatment < handle
                                 
                                 tmp_data_new = Data.Data(obj.camera_type,obj.treatment_type,tmp_data_dir_path);
                                 
-                                if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,tmp_data_new.camera_type)&&isequal(obj.tmp_data.treatment_type,tmp_data_new.treatment_type)
+                                if ~isempty(obj.current_data)&&isequal(obj.current_data.camera_type,tmp_data_new.camera_type)&&isequal(obj.current_data.treatment_type,tmp_data_new.treatment_type)
                                     
-                                    if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                                    if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                                         
-                                        tmp_data_new.pics.dpg = obj.tmp_data.pics.dpg;
+                                        tmp_data_new.pics.dpg = obj.current_data.pics.dpg;
+                                        
+                                        tmp_data_new.pics.reset_clb;
                                         
                                     end
                                                                     
-                                    tmp_data_new.pics.pic_props = obj.tmp_data.pics.pic_props;
+                                    tmp_data_new.pics.pic_props = obj.current_data.pics.pic_props;
                                     
+                                else
+                                    
+                                    %%% update global observe list
+                                    
+                                    % update global obs y-axis
+                                    % list
+                                    
+                                    tmp_struct = dir([Treatment.Default_parameters.treatment_script_path,'\', ...
+                                        tmp_data_new.camera_type,'\',tmp_data_new.treatment_type]);
+                                    
+                                    tmp_list = {tmp_struct.name};
+                                    
+                                    list_y_axis = tmp_list{3:end};
+                                    
+                                    if iscell(list_y_axis)
+                                        
+                                        list_y_axis = cellfun(@(x) strtok(x,'.'),list_y_axis);
+                                        
+                                    else
+                                        
+                                        list_y_axis = strtok(list_y_axis,'.');
+                                        
+                                    end
+                                    
+                                    set(obj.gog.pum1,'String',list_y_axis,'Value',1);
+                                    
+                                    if iscell(list_y_axis)
+                                        
+                                        obj.glob_obs.y_axis = list_y_axis{1};
+                                        
+                                    else
+                                        
+                                        obj.glob_obs.y_axis = list_y_axis;
+                                        
+                                    end
+                                    
+                                    %%%
+                                    
+                                    set(obj.gog.pum1,'Enable','on')
+                                    
+                                    %%% update scan observe list
+                                    
+                                    %%% x-axis
+                                    
+                                    if ~isempty(obj.data_array.static_params)||~isempty(obj.data_array.dep_params)
+                                        
+                                        list_x_axis = ['none',{obj.data_array.static_params.name},{obj.data_array.dep_params.name}];
+                                        
+                                    else
+                                        
+                                        list_x_axis = {'none'};
+                                        
+                                    end
+                                    
+                                    set(obj.osg.pum1,'String',list_x_axis,'Value',1);
+                                    
+                                    %%% y-axis
+                                    
+                                    set(obj.osg.pum2,'String',list_y_axis,'Value',1);
+
                                 end
                                 
-                                obj.tmp_data = tmp_data_new;
+                                tmp_data_new.pics.show;
                                 
-                                delete([tmp_data_dir_path,'\pic_cor.mat']);
+                                obj.current_data = tmp_data_new;
                                 
-                                obj.tmp_data.pics.show;
+                                % update global observe
+                                
+                                tmp_data_new.glob_obs_y_axis = obj.glob_obs.y_axis;
+                                
+                                if isfield(obj.glob_obs,'values')
+                                    
+                                    obj.glob_obs.values(end+1) = tmp_data_new.glob_obs_y_axis_value;
+                                    
+                                else
+                                    
+                                    obj.glob_obs.values = tmp_data_new.glob_obs_y_axis_value;
+                                    
+                                end
                                 
                             else
                                 
@@ -1068,6 +1635,8 @@ classdef Treatment < handle
                                 
                                 movefile([raw_data_dir_path,'\*'],[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                 
+                                movefile([obj.data_path,'\Tmp\params.mat'],[seq_data_dir_path,'\',num2str(seq_nbr)]);
+                                
                                 % update listbox data
                                 
                                 tmp = get(obj.tmg.lsb3_1,'String');
@@ -1082,45 +1651,85 @@ classdef Treatment < handle
                                     
                                     obj.data_array = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                     
-                                    if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,obj.data_array.camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array.treatment_type)
+                                    if ~isempty(obj.current_data)&&isequal(obj.current_data.camera_type,obj.data_array.camera_type)&&isequal(obj.current_data.treatment_type,obj.data_array.treatment_type)
                                         
-                                        if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                                        if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                                             
-                                            obj.data_array.pics.dpg = obj.tmp_data.pics.dpg;
+                                            obj.data_array.pics.dpg = obj.current_data.pics.dpg;
+                                            
+                                            obj.data_array.pics.reset_clb;
                                             
                                         end
-                                      
-                                        obj.data_array.pics.pic_props = obj.tmp_data.pics.pic_props;
+                                        
+                                        obj.data_array.pics.pic_props = obj.current_data.pics.pic_props;
+                                        
+                                    else
+                                        
+                                        obj.update_glob_obs_list;
+                                        
+                                        set(obj.gog.pum1,'Enable','on')
+                                        
+                                        %%% update scan observe list
+                                        
+                                        % x-axis
+                                        
+                                        if ~isempty(obj.data_array.static_params)||~isempty(obj.data_array.dep_params)
+                                            
+                                            list_x_axis = ['none',{obj.data_array.static_params.name},{obj.data_array.dep_params.name}];
+                                            
+                                        else
+                                            
+                                            list_x_axis = {'none'};
+                                            
+                                        end
+                                        
+                                        set(obj.osg.pum1,'String',list_x_axis,'Value',1);
+                                        
+                                        % y-axis
+                                        
+                                        set(obj.osg.pum2,'String',get(obj.gog.pum1,'String'),'Value',1);
                                         
                                     end
                                     
-                                    obj.tmp_data = obj.data_array;
-                                    
                                     obj.data_array.pics.show;
                                     
-                                    obj.data_array.save;
+                                    obj.current_data = obj.data_array;
                                     
                                 else
                                     
                                     obj.data_array(end+1) = Data.Data(obj.camera_type,obj.treatment_type,[seq_data_dir_path,'\',num2str(seq_nbr)]);
                                     
-                                    if ~isempty(obj.tmp_data)&&isequal(obj.tmp_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.tmp_data.treatment_type,obj.data_array(end).treatment_type)
-                                                                                
-                                        if ~isempty(obj.tmp_data.pics.dpg)&&ishandle(obj.tmp_data.pics.dpg.h)
+                                    if ~isempty(obj.current_data)&&isequal(obj.current_data.camera_type,obj.data_array(end).camera_type)&&isequal(obj.current_data.treatment_type,obj.data_array(end).treatment_type)
+                                        
+                                        if ~isempty(obj.current_data.pics.dpg)&&ishandle(obj.current_data.pics.dpg.h)
                                             
-                                            obj.data_array(end).pics.dpg = obj.tmp_data.pics.dpg;
+                                            obj.data_array(end).pics.dpg = obj.current_data.pics.dpg;
+                                            
+                                            obj.data_array(end).pics.reset_clb;
                                             
                                         end
                                         
-                                        obj.data_array(end).pics.pic_props = obj.tmp_data.pics.pic_props;
+                                        obj.data_array(end).pics.pic_props = obj.current_data.pics.pic_props;
                                         
                                     end
                                     
-                                    obj.tmp_data = obj.data_array(end);
-                                    
                                     obj.data_array(end).pics.show;
                                     
-                                    obj.data_array(end).save;
+                                    obj.current_data = obj.data_array(end);
+                                    
+                                end
+                                
+                                % update global observe
+                                
+                                obj.data_array(end).glob_obs_y_axis = obj.glob_obs.y_axis;
+                                
+                                if isfield(obj.glob_obs,'values')
+                                    
+                                    obj.glob_obs.values(end+1) = obj.data_array(end).glob_obs_y_axis_value;
+                                    
+                                else
+                                    
+                                    obj.glob_obs.values = obj.data_array(end).glob_obs_y_axis_value;
                                     
                                 end
                                 
@@ -1129,6 +1738,241 @@ classdef Treatment < handle
                             
                     end
                     
+            end
+            
+        end
+        
+        function update_scan_obs_lists(obj)
+
+            % update scan obs x- and y-axis
+            % lists and global obs y-axis
+            % list
+            
+            %%% x-axis
+            
+            if ~isempty(obj.data_array.static_params)||~isempty(obj.data_array.dep_params)
+            
+            list_x_axis = ['none',{obj.data_array.static_params.name},{obj.data_array.dep_params.name}];
+            
+            else
+                
+                list_x_axis = {'none'};
+                
+            end
+            
+            set(obj.osg.pum1,'String',list_x_axis,'Value',1);
+            
+            obj.scan_obs.x_axis = list_x_axis{1};
+            
+            %%% y-axis
+            
+            delete([Treatment.Default_parameters.treatment_script_path,'\', ...
+                obj.data_array.camera_type,'\',obj.data_array.treatment_type,'\*.asv']);
+            
+            tmp_struct = dir([Treatment.Default_parameters.treatment_script_path,'\', ...
+                obj.data_array.camera_type,'\',obj.data_array.treatment_type]);
+            
+            tmp_list = {tmp_struct.name};
+            
+            list_y_axis = tmp_list{3:end};
+            
+            if iscell(list_y_axis)
+            
+            list_y_axis = cellfun(@(x) strtok(x,'.'),list_y_axis);
+            
+            else
+                
+                list_y_axis = strtok(list_y_axis,'.');
+                
+            end
+            
+            set(obj.osg.pum2,'String',list_y_axis,'Value',1);
+            
+            set(obj.gog.pum1,'String',list_y_axis,'Value',1);
+            
+            if iscell(list_y_axis)
+                
+                obj.scan_obs.y_axis = list_y_axis{1};
+                
+            else
+                
+                obj.scan_obs.y_axis = list_y_axis;
+                
+            end
+            
+            % update global scan list
+            
+            if iscell(list_y_axis)
+                
+                obj.glob_obs.y_axis = list_y_axis{1};
+                
+            else
+                
+                obj.glob_obs.y_axis = list_y_axis;
+                
+            end
+            
+        end
+        
+        function update_glob_obs_list(obj)
+
+            % update global obs y-axis
+            % list
+            
+            delete([Treatment.Default_parameters.treatment_script_path,'\', ...
+                obj.data_array.camera_type,'\',obj.data_array.treatment_type,'\*.asv']); % clean .asv files
+            
+            tmp_struct = dir([Treatment.Default_parameters.treatment_script_path,'\', ...
+                obj.data_array.camera_type,'\',obj.data_array.treatment_type]);
+            
+            tmp_list = {tmp_struct.name};
+            
+            list_y_axis = tmp_list{3:end};
+            
+            if iscell(list_y_axis)
+            
+            list_y_axis = cellfun(@(x) strtok(x,'.'),list_y_axis);
+            
+            else
+                
+                list_y_axis = strtok(list_y_axis,'.');
+                
+            end
+            
+            set(obj.gog.pum1,'String',list_y_axis,'Value',1);
+            
+            if iscell(list_y_axis)
+            
+            obj.glob_obs.y_axis = list_y_axis{1};
+            
+            else
+                
+                obj.glob_obs.y_axis = list_y_axis;
+                
+            end
+            
+        end
+        
+        function post_set_glob_obs(obj,~,~)
+            
+            if isfield(obj.glob_obs,'values')&&~isempty(obj.glob_obs.values)
+                
+                % update plot
+                
+                plot(1:length(obj.glob_obs.values),obj.glob_obs.values,'Parent',obj.gog.ax)
+                
+                if ~isequal(length(obj.glob_obs.values),1)
+                    
+                    xlim(obj.gog.ax,[1 length(obj.glob_obs.values)])
+                    
+                end
+                
+                xlabel(obj.gog.ax,'# run')
+                
+                ylabel(obj.gog.ax,obj.glob_obs.y_axis)
+                
+                set(obj.gog.ax,'Box','on','Tickdir','out','NextPlot','replace','FontSize',8);
+                
+            else
+                
+                plot([],[],'Parent',obj.gog.ax)
+                
+                xlabel(obj.gog.ax,[])
+                
+                ylabel(obj.gog.ax,[])
+                
+                set(obj.gog.ax,'Box','on','Tickdir','out','NextPlot','replace','FontSize',8);
+                
+            end
+
+        end
+        
+        function post_set_scan_obs(obj,~,~)
+            
+            if isfield(obj.scan_obs,'x_axis')&&isfield(obj.scan_obs,'y_axis')
+                
+                if ~isempty(obj.scan_obs.x_axis)&&~isempty(obj.scan_obs.y_axis)
+                    
+                    if ~strcmp(obj.scan_obs.x_axis,obj.data_array(1).scan_obs_x_axis)
+                        
+                        for i=1:length(obj.data_array)
+                            
+                            obj.data_array(i).scan_obs_x_axis = obj.scan_obs.x_axis;
+                            
+                            if strcmp(obj.scan_obs.x_axis,'none')
+                                
+                                obj.data_array(i).scan_obs_x_axis_value = i;
+                                
+                            end
+                            
+                        end
+                        
+                    end
+                    
+                    if ~strcmp(obj.scan_obs.y_axis,obj.data_array(1).scan_obs_y_axis)
+                        
+                        for i=1:length(obj.data_array)
+                            
+                            obj.data_array(i).scan_obs_y_axis = obj.scan_obs.y_axis;
+                            
+                        end
+                        
+                    end
+                    
+                    x_axis_values = [obj.data_array.scan_obs_x_axis_value];
+                    
+                    y_axis_values = [obj.data_array.scan_obs_y_axis_value];
+                    
+                    uniq_x_axis_values = unique(x_axis_values);
+                    
+                    % update plot
+                    
+                    if isequal(length(x_axis_values),length(y_axis_values))
+                        
+                        % plot errorbars if possible
+                        
+                        if length(uniq_x_axis_values)<length(x_axis_values)
+                            
+                            mean_y_axis_values = zeros(size(uniq_x_axis_values));
+                            
+                            std_y_axis_values = zeros(size(uniq_x_axis_values));
+                            
+                            for i = 1:length(uniq_x_axis_values)
+                                
+                                ind_array = find(x_axis_values==uniq_x_axis_values(i));
+                                
+                                mean_y_axis_values(i) = mean(y_axis_values(ind_array));
+                                
+                                std_y_axis_values(i) = std(y_axis_values(ind_array));
+                                
+                            end
+                            
+                            plot(x_axis_values,y_axis_values,'Parent',obj.osg.ax,'Marker','o',...
+                            'MarkerEdgeColor','k','LineStyle','none')
+             
+                            hold on
+                            
+                            errorbar(uniq_x_axis_values,mean_y_axis_values,std_y_axis_values/2,'Parent',obj.osg.ax,'LineStyle','-','Color','r')
+                            
+                            hold off
+                            
+                        else
+                            
+                            plot(x_axis_values,y_axis_values,'Parent',obj.osg.ax,'Marker','o',...
+                            'MarkerEdgeColor','k','LineStyle','-','Color','r')
+                            
+                        end
+                        
+                        xlabel(obj.osg.ax,obj.scan_obs.x_axis,'interpreter','none')
+                        
+                        ylabel(obj.osg.ax,obj.scan_obs.y_axis,'interpreter','none')
+                        
+                        set(obj.osg.ax,'Box','on','Tickdir','out','NextPlot','replace','FontSize',8);
+                        
+                    end
+                    
+                end
+                
             end
             
         end

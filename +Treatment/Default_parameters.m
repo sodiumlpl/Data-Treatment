@@ -135,6 +135,12 @@ classdef Default_parameters
         
     end
     
+    properties (Constant) % Observe
+        
+        treatment_script_path = 'D:\Data\Treatment_Scripts';
+        
+    end
+    
     methods
         
     end

@@ -42,11 +42,11 @@ classdef Network < handle
         function DgmRcdFcn(obj,udp,~)
             
             message = fscanf(udp);
+                        
+            disp(['Received message : ',message])
             
             obj.parent.execute(udp.Name,message);
-            
-            disp(['received message : ',message])
-            
+
         end
         
         function send_message(obj,name,message)

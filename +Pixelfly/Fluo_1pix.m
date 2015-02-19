@@ -17,6 +17,12 @@ classdef Fluo_1pix < handle
         
     end
     
+    properties
+        
+        tmp_pic_cor
+        
+    end
+    
     properties (SetObservable = true)
         
         pic_type
@@ -67,21 +73,21 @@ classdef Fluo_1pix < handle
             obj.pic_props(1).roi_wth = 519;
             
             obj.pic_props(1).pic_min = -10 ;
-            obj.pic_props(1).pic_max = 100 ;
+            obj.pic_props(1).pic_max = 500 ;
             
             obj.pic_props(2).r_roi_ctr = 696;
             obj.pic_props(2).c_roi_ctr = 520;
             obj.pic_props(2).roi_wth = 519;
             
-            obj.pic_props(2).pic_min = 0 ;
-            obj.pic_props(2).pic_max = 1000 ;
+            obj.pic_props(2).pic_min = 200 ;
+            obj.pic_props(2).pic_max = 700 ;
             
             obj.pic_props(3).r_roi_ctr = 696;
             obj.pic_props(3).c_roi_ctr = 520;
             obj.pic_props(3).roi_wth = 519;
             
-            obj.pic_props(3).pic_min = 0 ;
-            obj.pic_props(3).pic_max = 1000 ;
+            obj.pic_props(3).pic_min = 2 ;
+            obj.pic_props(3).pic_max = 700 ;
             
             
             % initialize listeners
@@ -611,6 +617,22 @@ classdef Fluo_1pix < handle
             
         end
         
+        function reset_clb(obj)
+            
+            set(obj.dpg.hsp1_1,'ButtonDownFcn',@obj.dpg_hsp1_1_clb)
+            
+            set(obj.dpg.hsp1_2,'ButtonDownFcn',@obj.dpg_hsp1_2_clb)
+            
+            set(obj.dpg.hsp1_3,'ButtonDownFcn',@obj.dpg_hsp1_3_clb)
+            
+            set(obj.dpg.edt2_1,'Callback',@obj.dpg_edt2_1_clb)
+            set(obj.dpg.edt2_2,'Callback',@obj.dpg_edt2_2_clb)
+            set(obj.dpg.edt2_3,'Callback',@obj.dpg_edt2_3_clb)
+            set(obj.dpg.edt2_4,'Callback',@obj.dpg_edt2_4_clb)
+            set(obj.dpg.edt2_5,'Callback',@obj.dpg_edt2_5_clb)
+            
+        end
+        
         function dpg_hsp1_1_clb(obj,~,~)
             
             obj.pic_type = 'Corrected';
@@ -972,11 +994,11 @@ classdef Fluo_1pix < handle
                         
                     case 'Signal'
                         
-                        obj.disp_pic_sig;
+                        obj.disp_pic_at;
                         
                     case 'Background'
                         
-                        obj.disp_pic_bg;
+                        obj.disp_pic_at_bg;
                         
                 end
                 
@@ -1005,31 +1027,27 @@ classdef Fluo_1pix < handle
         
         function pic_cor = get.pic_cor(obj)
             
-            path = [obj.pics_path,'\pic_cor.mat'];
-            
-            try
+            if isempty(obj.tmp_pic_cor)
                 
-                load(path);
-                
-            catch
-                
-                pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg));
-                
-                save(path,'pic_cor');
+                obj.tmp_pic_cor = (double(obj.pic_at) - double(obj.pic_at_bg));
                 
             end
             
+            pic_cor = obj.tmp_pic_cor;
+            
         end
         
-        function a = saveobj(obj)
+        function pic = saveobj(obj)
             
-            a = obj;
+            pic = obj;
             
-            a.lst_pic_type = [];
+            pic.lst_pic_type = [];
             
-            a.lst_pic_props = [];
+            pic.lst_pic_props = [];
             
-            a.dpg = [];
+            pic.dpg = [];
+            
+            pic.tmp_pic_cor = [];
             
         end
         
@@ -1037,13 +1055,13 @@ classdef Fluo_1pix < handle
     
     methods (Static = true)
         
-        function obj = loadobj(a)
+        function obj = loadobj(pic)
             
-            a.lst_pic_type = addlistener(a,'pic_type','PostSet',@a.postset_pic_type);
+            pic.lst_pic_type = addlistener(pic,'pic_type','PostSet',@pic.postset_pic_type);
             
-            a.lst_pic_props = addlistener(a,'pic_props','PostSet',@a.postset_pic_props);
+            pic.lst_pic_props = addlistener(pic,'pic_props','PostSet',@pic.postset_pic_props);
             
-            obj = a;  % return the updated object
+            obj = pic;  % return the updated object
             
         end
         
