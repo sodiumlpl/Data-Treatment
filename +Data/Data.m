@@ -72,9 +72,9 @@ classdef Data < handle
                 
                 load([obj.pics_path,'\params.mat'])
                 
-                data.static_params = static_params;
+                obj.static_params = static_params;
                 
-                data.dep_params = dep_params;
+                obj.dep_params = dep_params;
                 
             end
             
@@ -97,6 +97,12 @@ classdef Data < handle
                         case 'fluo_1pix'
                             
                             obj.pics = Pixelfly.Fluo_1pix(pics_path);
+                            
+                            obj.pics.parent = obj;
+                            
+                        case 'absorption'
+                            
+                            obj.pics = Pixelfly.Absorption(pics_path);
                             
                             obj.pics.parent = obj;
 
@@ -143,7 +149,8 @@ classdef Data < handle
                 
                 if ~isempty(ind)
                     
-                    if isequal(obj.treat_struct(ind).props,obj.pics.pic_props)
+                    if isequal(obj.treat_struct(ind).props,obj.pics.pic_props)&&...
+                            isequal(obj.treat_struct(ind).static_props,obj.pics.static_pic_props)
                         
                         obj.scan_obs_y_axis_value = obj.treat_struct(ind).value;
                         
@@ -154,6 +161,8 @@ classdef Data < handle
                         obj.treat_struct(ind).value = obj.scan_obs_y_axis_value;
                         
                         obj.treat_struct(ind).props = obj.pics.pic_props;
+                        
+                        obj.treat_struct(ind).static_props = obj.pics.static_pic_props;
                         
                     end
                     
@@ -167,6 +176,8 @@ classdef Data < handle
                     
                     obj.treat_struct(end+1).props = obj.pics.pic_props;
                     
+                    obj.treat_struct(end+1).static_props = obj.pics.static_pic_props;
+                    
                 end
                 
             else
@@ -174,7 +185,7 @@ classdef Data < handle
                 obj.scan_obs_y_axis_value = eval([obj.scan_obs_y_axis,'(obj);']);
                 
                 obj.treat_struct = struct('name',obj.scan_obs_y_axis,'value',obj.scan_obs_y_axis_value,...
-                    'props',obj.pics.pic_props);
+                    'props',obj.pics.pic_props,'static_props',obj.pics.static_pic_props);
 
             end
             
@@ -204,6 +215,12 @@ classdef Data < handle
             data.static_params = [];
             data.dep_params = [];
 
+        end
+        
+        function delete(obj)
+           
+            delete(obj.pics)
+            
         end
         
     end

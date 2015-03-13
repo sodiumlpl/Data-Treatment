@@ -29,6 +29,8 @@ classdef Fluo_1pix < handle
         
         pic_props % pictures properties
         
+        static_pic_props  % static picture properties
+        
     end
     
     properties % listeners
@@ -36,6 +38,8 @@ classdef Fluo_1pix < handle
         lst_pic_type
         
         lst_pic_props
+        
+        lst_static_pic_props
         
     end
     
@@ -86,7 +90,7 @@ classdef Fluo_1pix < handle
             obj.pic_props(3).c_roi_ctr = 520;
             obj.pic_props(3).roi_wth = 519;
             
-            obj.pic_props(3).pic_min = 2 ;
+            obj.pic_props(3).pic_min = 200 ;
             obj.pic_props(3).pic_max = 700 ;
             
             
@@ -95,6 +99,8 @@ classdef Fluo_1pix < handle
             obj.lst_pic_type = addlistener(obj,'pic_type','PostSet',@obj.postset_pic_type);
             
             obj.lst_pic_props = addlistener(obj,'pic_props','PostSet',@obj.postset_pic_props);
+            
+            obj.lst_static_pic_props = addlistener(obj,'static_pic_props','PostSet',@obj.postset_static_pic_props);
             
         end
         
@@ -985,6 +991,46 @@ classdef Fluo_1pix < handle
         function postset_pic_props(obj,~,~)
             
             if ~isempty(obj.pic_type)
+            
+            % check properties boundaries and correct if needed
+                
+                switch obj.pic_type
+                    
+                    case 'Corrected'
+                        
+                        ind = 1;
+                        
+                    case 'Signal'
+                        
+                        ind = 2;
+                        
+                    case 'Background'
+                        
+                        ind = 3;
+                        
+                end
+                
+                if ((obj.pic_props(ind).c_roi_ctr+obj.pic_props(ind).roi_wth)>obj.c_size(2) )|| ...
+                        ((obj.pic_props(ind).c_roi_ctr-obj.pic_props(ind).roi_wth)<obj.c_size(1) )
+                    
+                    obj.pic_props(ind).roi_wth = min(obj.c_size(2)-obj.pic_props(ind).c_roi_ctr, ...
+                        obj.pic_props(ind).c_roi_ctr-obj.c_size(1));
+                    
+                    set(obj.dpg.edt2_5,'String',num2str(obj.pic_props(ind).roi_wth));
+                    
+                end
+                
+                if ((obj.pic_props(ind).r_roi_ctr+obj.pic_props(ind).roi_wth)>obj.r_size(2) )|| ...
+                        ((obj.pic_props(ind).r_roi_ctr-obj.pic_props(ind).roi_wth)<obj.r_size(1) )
+                    
+                    obj.pic_props(ind).roi_wth = min(obj.r_size(2)-obj.pic_props(ind).r_roi_ctr, ...
+                        obj.pic_props(ind).r_roi_ctr-obj.r_size(1));
+                    
+                    set(obj.dpg.edt2_5,'String',num2str(obj.pic_props(ind).roi_wth));
+                    
+                end
+                
+                % display pictures
                 
                 switch obj.pic_type
                     
@@ -1005,6 +1051,10 @@ classdef Fluo_1pix < handle
                 obj.postset_pic_type;
                 
             end
+            
+        end
+        
+        function postset_static_pic_props(obj,~,~)
             
         end
         
@@ -1060,6 +1110,16 @@ classdef Fluo_1pix < handle
             pic.lst_pic_type = addlistener(pic,'pic_type','PostSet',@pic.postset_pic_type);
             
             pic.lst_pic_props = addlistener(pic,'pic_props','PostSet',@pic.postset_pic_props);
+            
+            pic.lst_static_pic_props = addlistener(pic,'static_pic_props','PostSet',@pic.postset_static_pic_props);
+            
+            % retrocompatibility 11/03/2015 update
+            
+            if isempty(pic.static_pic_props)
+                
+                pic.parent.treat_struct = [];
+                
+            end
             
             obj = pic;  % return the updated object
             

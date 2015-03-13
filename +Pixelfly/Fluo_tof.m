@@ -38,6 +38,8 @@ classdef Fluo_tof < handle
         
         pic_props % pictures properties
         
+        static_pic_props  % static picture properties
+        
     end
     
     properties % listeners
@@ -45,6 +47,8 @@ classdef Fluo_tof < handle
         lst_pic_type
         
         lst_pic_props
+        
+        lst_static_pic_props
         
     end
     
@@ -77,54 +81,54 @@ classdef Fluo_tof < handle
             
             % set default picture properties
             
-            obj.pic_props(1).r_roi_ctr = 696;
-            obj.pic_props(1).c_roi_ctr = 520;
-            obj.pic_props(1).roi_wth = 519;
+            obj.pic_props(1).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Corrected_r_roi_ctr;
+            obj.pic_props(1).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Corrected_c_roi_ctr;
+            obj.pic_props(1).roi_wth = Pixelfly.Default_parameters.Fluo_tof_Corrected_roi_wth;
             
-            obj.pic_props(1).pic_min = -10 ;
-            obj.pic_props(1).pic_max = 100 ;
+            obj.pic_props(1).pic_min = Pixelfly.Default_parameters.Fluo_tof_Corrected_pic_min ;
+            obj.pic_props(1).pic_max = Pixelfly.Default_parameters.Fluo_tof_Corrected_pic_max ;
             
-            obj.pic_props(2).r_roi_ctr = 696;
-            obj.pic_props(2).c_roi_ctr = 520;
-            obj.pic_props(2).roi_wth = 519;
+            obj.pic_props(2).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Signal_r_roi_ctr;
+            obj.pic_props(2).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Signal_c_roi_ctr;
+            obj.pic_props(2).roi_wth = Pixelfly.Default_parameters.Fluo_tof_Signal_roi_wth;
             
-            obj.pic_props(2).pic_min = -10 ;
-            obj.pic_props(2).pic_max = 100 ;
+            obj.pic_props(2).pic_min = Pixelfly.Default_parameters.Fluo_tof_Signal_pic_min;
+            obj.pic_props(2).pic_max = Pixelfly.Default_parameters.Fluo_tof_Signal_pic_max;
             
-            obj.pic_props(3).r_roi_ctr = 696;
-            obj.pic_props(3).c_roi_ctr = 520;
-            obj.pic_props(3).roi_wth = 519;
+            obj.pic_props(3).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Background_r_roi_ctr;
+            obj.pic_props(3).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_Background_c_roi_ctr;
+            obj.pic_props(3).roi_wth = Pixelfly.Default_parameters.Fluo_tof_Background_roi_wth;
             
-            obj.pic_props(3).pic_min = -10 ;
-            obj.pic_props(3).pic_max = 100 ;
+            obj.pic_props(3).pic_min = Pixelfly.Default_parameters.Fluo_tof_Background_pic_min ;
+            obj.pic_props(3).pic_max = Pixelfly.Default_parameters.Fluo_tof_Background_pic_max ;
             
-            obj.pic_props(4).r_roi_ctr = 696;
-            obj.pic_props(4).c_roi_ctr = 520;
-            obj.pic_props(4).roi_wth = 519;
+            obj.pic_props(4).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_at_r_roi_ctr;
+            obj.pic_props(4).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_at_c_roi_ctr;
+            obj.pic_props(4).roi_wth = Pixelfly.Default_parameters.Fluo_tof_pic_at_roi_wth;
             
-            obj.pic_props(4).pic_min = 0 ;
-            obj.pic_props(4).pic_max = 1000 ;
+            obj.pic_props(4).pic_min = Pixelfly.Default_parameters.Fluo_tof_pic_at_pic_min ;
+            obj.pic_props(4).pic_max = Pixelfly.Default_parameters.Fluo_tof_pic_at_pic_max ;
             
-            obj.pic_props(5).r_roi_ctr = 696;
-            obj.pic_props(5).c_roi_ctr = 520;
-            obj.pic_props(5).roi_wth = 519;
+            obj.pic_props(5).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_at_bg_r_roi_ctr;
+            obj.pic_props(5).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_at_bg_c_roi_ctr;
+            obj.pic_props(5).roi_wth = Pixelfly.Default_parameters.Fluo_tof_pic_at_bg_roi_wth;
             
-            obj.pic_props(5).pic_min = 0 ;
-            obj.pic_props(5).pic_max = 1000 ;
+            obj.pic_props(5).pic_min = Pixelfly.Default_parameters.Fluo_tof_pic_at_bg_pic_min ;
+            obj.pic_props(5).pic_max = Pixelfly.Default_parameters.Fluo_tof_pic_at_bg_pic_max ;
             
-            obj.pic_props(6).r_roi_ctr = 696;
-            obj.pic_props(6).c_roi_ctr = 520;
-            obj.pic_props(6).roi_wth = 519;
+            obj.pic_props(6).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_wat_r_roi_ctr;
+            obj.pic_props(6).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_wat_c_roi_ctr;
+            obj.pic_props(6).roi_wth = Pixelfly.Default_parameters.Fluo_tof_pic_wat_roi_wth;
             
-            obj.pic_props(6).pic_min = 0 ;
-            obj.pic_props(6).pic_max = 1000 ;
+            obj.pic_props(6).pic_min = Pixelfly.Default_parameters.Fluo_tof_pic_wat_pic_min ;
+            obj.pic_props(6).pic_max = Pixelfly.Default_parameters.Fluo_tof_pic_wat_pic_max ;
             
-            obj.pic_props(7).r_roi_ctr = 696;
-            obj.pic_props(7).c_roi_ctr = 520;
-            obj.pic_props(7).roi_wth = 519;
+            obj.pic_props(7).r_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_wat_bg_r_roi_ctr;
+            obj.pic_props(7).c_roi_ctr = Pixelfly.Default_parameters.Fluo_tof_pic_wat_bg_c_roi_ctr;
+            obj.pic_props(7).roi_wth = Pixelfly.Default_parameters.Fluo_tof_pic_wat_bg_roi_wth;
             
-            obj.pic_props(7).pic_min = 0 ;
-            obj.pic_props(7).pic_max = 1000 ;
+            obj.pic_props(7).pic_min = Pixelfly.Default_parameters.Fluo_tof_pic_wat_bg_pic_min ;
+            obj.pic_props(7).pic_max = Pixelfly.Default_parameters.Fluo_tof_pic_wat_bg_pic_max ;
             
             
             % initialize listeners
@@ -132,6 +136,8 @@ classdef Fluo_tof < handle
             obj.lst_pic_type = addlistener(obj,'pic_type','PostSet',@obj.postset_pic_type);
             
             obj.lst_pic_props = addlistener(obj,'pic_props','PostSet',@obj.postset_pic_props);
+            
+            obj.lst_static_pic_props = addlistener(obj,'static_pic_props','PostSet',@obj.postset_static_pic_props);
             
         end
         
@@ -756,12 +762,12 @@ classdef Fluo_tof < handle
             set(obj.dpg.hsp1_2,'ButtonDownFcn',@obj.dpg_hsp1_2_clb)
             
             set(obj.dpg.hsp1_2_1,'ButtonDownFcn',@obj.dpg_hsp1_2_1_clb)
-            set(obj.dpg.hsp1_2_2,'ButtonDownFcn',@obj.dpg_hsp1_2_1_clb)
+            set(obj.dpg.hsp1_2_2,'ButtonDownFcn',@obj.dpg_hsp1_2_2_clb)
             
             set(obj.dpg.hsp1_3,'ButtonDownFcn',@obj.dpg_hsp1_3_clb)
             
             set(obj.dpg.hsp1_3_1,'ButtonDownFcn',@obj.dpg_hsp1_3_1_clb)
-            set(obj.dpg.hsp1_3_2,'ButtonDownFcn',@obj.dpg_hsp1_3_1_clb)
+            set(obj.dpg.hsp1_3_2,'ButtonDownFcn',@obj.dpg_hsp1_3_2_clb)
             
             set(obj.dpg.edt2_1,'Callback',@obj.dpg_edt2_1_clb)
             set(obj.dpg.edt2_2,'Callback',@obj.dpg_edt2_2_clb)
@@ -1433,8 +1439,64 @@ classdef Fluo_tof < handle
         end
         
         function postset_pic_props(obj,~,~)
-            
+       
             if ~isempty(obj.pic_type)
+                
+                % check properties boundaries and correct if needed
+                
+                switch obj.pic_type
+                    
+                    case 'Corrected'
+                        
+                        ind = 1;
+                        
+                    case 'Signal'
+                        
+                        ind = 2;
+                        
+                    case 'Background'
+                        
+                        ind = 3;
+                        
+                    case 'pic_at'
+                        
+                        ind = 4;
+                        
+                    case 'pic_at_bg'
+                        
+                        ind = 5;
+                        
+                    case 'pic_wat'
+                        
+                        ind = 6;
+                        
+                    case 'pic_wat_bg'
+                        
+                        ind = 7;
+                        
+                end
+                
+                if ((obj.pic_props(ind).c_roi_ctr+obj.pic_props(ind).roi_wth)>obj.c_size(2) )|| ...
+                        ((obj.pic_props(ind).c_roi_ctr-obj.pic_props(ind).roi_wth)<obj.c_size(1) )
+                    
+                    obj.pic_props(ind).roi_wth = min(obj.c_size(2)-obj.pic_props(ind).c_roi_ctr, ...
+                        obj.pic_props(ind).c_roi_ctr-obj.c_size(1));
+                    
+                    set(obj.dpg.edt2_5,'String',num2str(obj.pic_props(ind).roi_wth));
+                    
+                end
+                
+                if ((obj.pic_props(ind).r_roi_ctr+obj.pic_props(ind).roi_wth)>obj.r_size(2) )|| ...
+                        ((obj.pic_props(ind).r_roi_ctr-obj.pic_props(ind).roi_wth)<obj.r_size(1) )
+                    
+                    obj.pic_props(ind).roi_wth = min(obj.r_size(2)-obj.pic_props(ind).r_roi_ctr, ...
+                        obj.pic_props(ind).r_roi_ctr-obj.r_size(1));
+                    
+                    set(obj.dpg.edt2_5,'String',num2str(obj.pic_props(ind).roi_wth));
+                    
+                end
+                
+                % display pictures
                 
                 switch obj.pic_type
                     
@@ -1455,6 +1517,10 @@ classdef Fluo_tof < handle
                 obj.postset_pic_type;
                 
             end
+            
+        end
+        
+        function postset_static_pic_props(obj,~,~)
             
         end
         
@@ -1554,6 +1620,16 @@ classdef Fluo_tof < handle
             pic.lst_pic_type = addlistener(pic,'pic_type','PostSet',@pic.postset_pic_type);
             
             pic.lst_pic_props = addlistener(pic,'pic_props','PostSet',@pic.postset_pic_props);
+            
+            pic.lst_static_pic_props = addlistener(pic,'static_pic_props','PostSet',@pic.postset_static_pic_props);
+            
+            % retrocompatibility 11/03/2015 update
+            
+            if isempty(pic.static_pic_props)
+                
+                pic.parent.treat_struct = [];
+                
+            end
             
             obj = pic;  % return the updated object
             
