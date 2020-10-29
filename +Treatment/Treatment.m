@@ -604,12 +604,53 @@ classdef Treatment < handle
             
             % Text
             
-            c_ofs = 0.185;
+            c_ofs = 0.105;
             r_ofs = 0.155;
             c_wth = 0.08;
-            r_wth = 0.025;
+            r_wth = 0.03;
             
             obj.gog.txt1 = uicontrol(...
+                'Parent'               ,obj.gog.hsp ...
+                ,'Style'                ,'text' ...
+                ,'String'               ,'Fit type :' ...
+                ,'FontName'             ,Treatment.Default_parameters.Text_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Text_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Text_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Text_FontWeight ...
+                ,'HorizontalAlignment'  ,'left' ...
+                ,'Units'                ,Treatment.Default_parameters.Text_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % pop-up
+            
+            c_ofs = 0.10;
+            r_ofs = 0.08;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.gog.pum1 = uicontrol(...
+                'Parent'               ,obj.gog.hsp ...
+                ,'Style'                ,'popupmenu' ...
+                ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
+                ,'FontName'             ,Treatment.Default_parameters.Popup_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
+                ,'String'               ,'static_widths' ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.gog_pum1_clb ...
+                ,'Enable'               ,'off' ...
+                );
+            
+            % Text
+            
+            c_ofs = 0.405;
+            r_ofs = 0.155;
+            c_wth = 0.08;
+            r_wth = 0.03;
+            
+            obj.gog.txt2 = uicontrol(...
                 'Parent'               ,obj.gog.hsp ...
                 ,'Style'                ,'text' ...
                 ,'String'               ,'y axis :' ...
@@ -624,12 +665,12 @@ classdef Treatment < handle
             
             % pop-up
             
-            c_ofs = 0.18;
+            c_ofs = 0.40;
             r_ofs = 0.08;
             c_wth = 0.2;
             r_wth = 0.05;
             
-            obj.gog.pum1 = uicontrol(...
+            obj.gog.pum2 = uicontrol(...
                 'Parent'               ,obj.gog.hsp ...
                 ,'Style'                ,'popupmenu' ...
                 ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
@@ -637,15 +678,15 @@ classdef Treatment < handle
                 ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
                 ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
                 ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
-                ,'String'               ,'none' ...
+                ,'String'               ,'roi_total_signal' ...
                 ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
-                ,'Callback'             ,@obj.gog_pum1_clb ...
+                ,'Callback'             ,@obj.gog_pum2_clb ...
                 ,'Enable'               ,'off' ...
                 );
             
             % pushbutton 2_1 geometry
             
-            c_ofs = 0.5;
+            c_ofs = 0.75;
             r_ofs = 0.08;
             c_wth = 0.2;
             r_wth = 0.05;
@@ -674,7 +715,24 @@ classdef Treatment < handle
             
             list_y_axis = get(obj.gog.pum1,'String');
             
-            obj.glob_obs.y_axis = list_y_axis{get(obj.gog.pum1,'Value')};
+            fit_type = list_y_axis{get(obj.gog.pum1,'Value')};
+            
+            list_fit_type = {Fit.Default_parameters.fit_struct.type};
+            
+            list_y_axis_params = Fit.Default_parameters.fit_struct(strcmp(fit_type,list_fit_type)).parameters;
+            
+            set(obj.gog.pum2,'String',list_y_axis_params,'Value',1); 
+                
+            obj.glob_obs = struct('fit_type',fit_type,...
+                    'y_axis',list_y_axis_params{1});
+
+        end
+        
+        function gog_pum2_clb(obj,~,~)
+            
+            list_y_axis = get(obj.gog.pum2,'String');
+            
+            obj.glob_obs.y_axis = list_y_axis{get(obj.gog.pum2,'Value')};
             
         end
         
@@ -820,7 +878,7 @@ classdef Treatment < handle
                             
                             for i = 2:length(sorted_list)
                                 
-                                sorted_list{i} = ['Scan',num2str(list_tmp(i))];
+                                sorted_list{i} = ['Scan',num2str(list_tmp(i-1))];
                                 
                             end
                             
@@ -907,10 +965,10 @@ classdef Treatment < handle
             
             % Text
             
-            c_ofs = 0.09;
-            r_ofs = 0.115;
+            c_ofs = 0.03;
+            r_ofs = 0.1;
             c_wth = 0.08;
-            r_wth = 0.025;
+            r_wth = 0.03;
             
             obj.osg.txt1 = uicontrol(...
                 'Parent'               ,obj.osg.hsp ...
@@ -927,7 +985,7 @@ classdef Treatment < handle
             
             % pop-up
             
-            c_ofs = 0.09;
+            c_ofs = 0.03;
             r_ofs = 0.04;
             c_wth = 0.2;
             r_wth = 0.05;
@@ -948,12 +1006,53 @@ classdef Treatment < handle
             
             % Text
             
-            c_ofs = 0.35;
-            r_ofs = 0.115;
+            c_ofs = 0.27;
+            r_ofs = 0.1;
             c_wth = 0.08;
-            r_wth = 0.025;
+            r_wth = 0.03;
             
             obj.osg.txt2 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'text' ...
+                ,'String'               ,'Fit type :' ...
+                ,'FontName'             ,Treatment.Default_parameters.Text_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Text_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Text_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Text_FontWeight ...
+                ,'HorizontalAlignment'  ,'left' ...
+                ,'Units'                ,Treatment.Default_parameters.Text_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                );
+            
+            % pop-up
+            
+            c_ofs = 0.27;
+            r_ofs = 0.04;
+            c_wth = 0.2;
+            r_wth = 0.05;
+            
+            obj.osg.pum2 = uicontrol(...
+                'Parent'               ,obj.osg.hsp ...
+                ,'Style'                ,'popupmenu' ...
+                ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
+                ,'FontName'             ,Treatment.Default_parameters.Popup_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
+                ,'String'               ,'static_widths' ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.osg_pum2_clb ...
+                ,'Enable'               ,'off' ...
+                );
+            
+            % Text
+            
+            c_ofs = 0.49;
+            r_ofs = 0.1;
+            c_wth = 0.08;
+            r_wth = 0.03;
+            
+            obj.osg.txt3 = uicontrol(...
                 'Parent'               ,obj.osg.hsp ...
                 ,'Style'                ,'text' ...
                 ,'String'               ,'y axis :' ...
@@ -968,12 +1067,12 @@ classdef Treatment < handle
             
             % pop-up
             
-            c_ofs = 0.35;
+            c_ofs = 0.49;
             r_ofs = 0.04;
             c_wth = 0.2;
             r_wth = 0.05;
             
-            obj.osg.pum2 = uicontrol(...
+            obj.osg.pum3 = uicontrol(...
                 'Parent'               ,obj.osg.hsp ...
                 ,'Style'                ,'popupmenu' ...
                 ,'Units'                ,Treatment.Default_parameters.Popup_Units ...
@@ -981,23 +1080,23 @@ classdef Treatment < handle
                 ,'FontSize'             ,Treatment.Default_parameters.Popup_FontSize ...
                 ,'FontUnits'            ,Treatment.Default_parameters.Popup_FontUnits ...
                 ,'FontWeight'           ,Treatment.Default_parameters.Popup_FontWeight ...
-                ,'String'               ,'none' ...
+                ,'String'               ,'roi_total_signal' ...
                 ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
-                ,'Callback'             ,@obj.osg_pum2_clb ...
+                ,'Callback'             ,@obj.osg_pum3_clb ...
                 ,'Enable'               ,'off' ...
                 );
             
             % pushbutton geometry
             
-            c_ofs = 0.62;
-            r_ofs = 0.065;
-            c_wth = 0.3;
+            c_ofs = 0.7;
+            r_ofs = 0.12;
+            c_wth = 0.25;
             r_wth = 0.0625;
             
-            obj.osg.but = uicontrol(...
+            obj.osg.but1 = uicontrol(...
                 'Parent'                ,obj.osg.hsp ...
                 ,'Style'                ,'pushbutton' ...
-                ,'String'               ,'Update picture parameters' ...
+                ,'String'               ,'Update parameters' ...
                 ,'FontName'             ,Treatment.Default_parameters.Pushbutton_FontName ...
                 ,'FontSize'             ,Treatment.Default_parameters.Pushbutton_FontSize ...
                 ,'FontUnits'            ,Treatment.Default_parameters.Pushbutton_FontUnits ...
@@ -1005,6 +1104,27 @@ classdef Treatment < handle
                 ,'Units'                ,Treatment.Default_parameters.Pushbutton_Units ...
                 ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
                 ,'Callback'             ,@obj.set_obs_params_lists ...
+                ,'Enable'               ,'off' ...
+                );
+            
+            % pushbutton geometry
+            
+            c_ofs = 0.7;
+            r_ofs = 0.04;
+            c_wth = 0.25;
+            r_wth = 0.0625;
+            
+            obj.osg.but2 = uicontrol(...
+                'Parent'                ,obj.osg.hsp ...
+                ,'Style'                ,'pushbutton' ...
+                ,'String'               ,'Print figure' ...
+                ,'FontName'             ,Treatment.Default_parameters.Pushbutton_FontName ...
+                ,'FontSize'             ,Treatment.Default_parameters.Pushbutton_FontSize ...
+                ,'FontUnits'            ,Treatment.Default_parameters.Pushbutton_FontUnits ...
+                ,'FontWeight'           ,Treatment.Default_parameters.Pushbutton_FontWeight ...
+                ,'Units'                ,Treatment.Default_parameters.Pushbutton_Units ...
+                ,'Position'             ,[c_ofs r_ofs c_wth r_wth] ...
+                ,'Callback'             ,@obj.osg_but2_clb ...
                 ,'Enable'               ,'off' ...
                 );
             
@@ -1021,17 +1141,80 @@ classdef Treatment < handle
         function osg_pum2_clb(obj,~,~)
             
             list_y_axis = get(obj.osg.pum2,'String');
-            
-            if iscell(list_y_axis)
                 
-                obj.scan_obs.y_axis = list_y_axis{get(obj.osg.pum2,'Value')};
+            fit_type = list_y_axis{get(obj.osg.pum2,'Value')};
+            
+            list_fit_type = {Fit.Default_parameters.fit_struct.type};
+            
+            ind = find(strcmp(fit_type,list_fit_type));
+            
+            list_y_axis_params = Fit.Default_parameters.fit_struct(ind).parameters;
+            
+            set(obj.osg.pum3,'String',list_y_axis_params,'Value',1);
+            
+            obj.scan_obs = struct('fit_type',list_fit_type{ind},...
+                'y_axis',list_y_axis_params{1},'x_axis',obj.scan_obs.x_axis);
+            
+        end
+        
+        function osg_pum3_clb(obj,~,~)
+            
+            list_y_axis = get(obj.osg.pum3,'String');
+                
+            obj.scan_obs.y_axis = list_y_axis{get(obj.osg.pum3,'Value')};
+
+        end
+        
+        function osg_but2_clb(obj,~,~)
+            
+            figure;
+            
+            x_axis_values = [obj.data_array.scan_obs_x_axis_value];
+            
+            y_axis_values = [obj.data_array.scan_obs_y_axis_value];
+            
+            uniq_x_axis_values = unique(x_axis_values);
+            
+            % plot errorbars if possible
+            
+            if length(uniq_x_axis_values)<length(x_axis_values)
+                
+                mean_y_axis_values = zeros(size(uniq_x_axis_values));
+                
+                std_y_axis_values = zeros(size(uniq_x_axis_values));
+                
+                for i = 1:length(uniq_x_axis_values)
+                    
+                    ind_array = find(x_axis_values==uniq_x_axis_values(i));
+                    
+                    mean_y_axis_values(i) = mean(y_axis_values(ind_array));
+                    
+                    std_y_axis_values(i) = std(y_axis_values(ind_array));
+                    
+                end
+                
+                plot(x_axis_values,y_axis_values,'Parent',gca,'Marker','o',...
+                    'MarkerEdgeColor','k','LineStyle','none')
+                
+                hold(gca,'on')
+                
+                errorbar(uniq_x_axis_values,mean_y_axis_values,std_y_axis_values/2,'Parent',gca,'LineStyle','-','Color','r')
+                
+                hold(gca,'off')
                 
             else
                 
-                obj.scan_obs.y_axis = list_y_axis;
+                plot(x_axis_values,y_axis_values,'Parent',gca,'Marker','o',...
+                    'MarkerEdgeColor','k','LineStyle','-','Color','r')
                 
             end
             
+            xlabel(gca,obj.scan_obs.x_axis,'interpreter','none')
+            
+            ylabel(gca,obj.scan_obs.y_axis,'interpreter','none')
+            
+            set(gca,'Box','on','Tickdir','out','NextPlot','replace','FontSize',8);
+
         end
         
         function postset_data_path(obj,~,~)
@@ -1152,13 +1335,38 @@ classdef Treatment < handle
                     try
                         
                         load([path,'\1\data.mat']);
-                        
+
                     catch
                         
                         load([path,'\1\data.m'],'-mat');
                         
                         save([path,'\1\data.mat'],'data')
                         delete([path,'\1\data.m'])
+                        
+                    end
+                    
+                    % change the data dir path if needed
+                    
+                    if strcmp(data.pics_path(1:3),'D:\')
+                        
+                        data.pics_path(1:3)='E:\';
+                        
+                    end
+                    
+                    if strcmp(data.pics.pics_path(1:3),'D:\')
+                        
+                        data.pics.pics_path(1:3)='E:\';
+                        
+                    end
+                    
+                    % set observe properties if empty
+                    
+                    if isempty(data.scan_obs_fit_type)
+                        
+                        data.scan_obs_fit_type = 'static_widths';
+                        data.glob_obs_fit_type = 'static_widths';
+                        data.scan_obs_y_axis = 'roi_total_signal';
+                        data.glob_obs_y_axis = 'roi_total_signal';
                         
                     end
                     
@@ -1171,7 +1379,7 @@ classdef Treatment < handle
                         try
                             
                             load([path,'\',num2str(i),'\data.mat']);
-                            
+
                         catch
                             
                             load([path,'\',num2str(i),'\data.m'],'-mat');
@@ -1181,11 +1389,38 @@ classdef Treatment < handle
                             
                         end
                         
+                        % change the data dir path if needed
+                        
+                        if strcmp(data.pics_path(1:3),'D:\')
+                            
+                            data.pics_path(1:3)='E:\';
+                            
+                        end
+                        
+                        if strcmp(data.pics.pics_path(1:3),'D:\')
+                            
+                            data.pics.pics_path(1:3)='E:\';
+                            
+                        end
+                        
+                        % set observe properties if empty
+                        
+                        if isempty(data.scan_obs_fit_type)
+                            
+                            data.scan_obs_fit_type = 'static_widths';
+                            data.glob_obs_fit_type = 'static_widths';
+                            data.scan_obs_y_axis = 'roi_total_signal';
+                            data.glob_obs_y_axis = 'roi_total_signal';
+                            
+                        end
+                        
                         obj.data_array(i) = data;
                         
                         disp(['Pic ',num2str(i),' reloaded !'])
                         
                     end
+                    
+                    % Show the scan GUI if it is closed
                                         
                     if isempty(obj.osg)||~ishandle(obj.osg.h)
                         
@@ -1205,15 +1440,9 @@ classdef Treatment < handle
                                 
                             end
                             
-                            if ~isequal(obj.data_array(1).pics.pic_props,obj.current_data.pics.pic_props)
-                                
-                                obj.data_array(1).pics.pic_props = obj.current_data.pics.pic_props;
-                                
-                            end
-                            
                             obj.current_data = obj.data_array(1);
                             
-                            obj.update_scan_obs_plot;
+                            %obj.update_scan_obs_plot;
                             
                         else
                             
@@ -1225,7 +1454,7 @@ classdef Treatment < handle
                             
                             obj.current_data = obj.data_array(1);
                             
-                            obj.set_obs_params_lists;
+                            %obj.set_obs_params_lists;
                             
                         end
                         
@@ -1233,25 +1462,32 @@ classdef Treatment < handle
                         
                         obj.current_data = obj.data_array(1);
                         
-                        obj.set_obs_params_lists;
+                        %obj.set_obs_params_lists;
                         
                     end
+                    
+                    % update scan observe GUI
+                    
+                    obj.set_obs_params_lists;
+                    %obj.update_scan_obs_plot;
                     
                     % enable global observe pop-up menu
                     
                     set(obj.gog.pum1,'Enable','on')
+                    set(obj.gog.pum2,'Enable','on')
              
                     if strcmp(obj.current_data_dir(1:4),'Scan')
                         
                         % enable scan observe buttons
                         
-                        set(obj.osg.but,'Enable','on')
+                        set(obj.osg.but1,'Enable','on')
+                        set(obj.osg.but2,'Enable','on')
                         
                         % re-enable scan observe pop-up menu
                         
                         set(obj.osg.pum1,'Enable','on')
-                        
                         set(obj.osg.pum2,'Enable','on')
+                        set(obj.osg.pum3,'Enable','on')
                         
                     end
                     
@@ -1419,6 +1655,17 @@ classdef Treatment < handle
                                     
                                     disp('Params file not found !')
                                     
+                                    while ~exist([obj.data_path,'\Tmp\params.mat'],'file')
+                                        
+                                        pause(1)
+                                        
+                                        disp('Waiting for file !')
+                                        
+                                    end
+                                    
+                                    disp('Found params file !')
+                                    
+                                    movefile([obj.data_path,'\Tmp\params.mat'],new_data_dir_path);
                                 end
                                 
                                 % update listbox data
@@ -1477,15 +1724,16 @@ classdef Treatment < handle
                                     
                                     % enable scan observe buttons
                                     
-                                    set(obj.osg.but,'Enable','on')
+                                    set(obj.osg.but1,'Enable','on')
+                                    set(obj.osg.but2,'Enable','on')
                                     
                                 end
                                 
                                 % re-enable pop-up menu
                                 
                                 set(obj.osg.pum1,'Enable','on')
-                                
                                 set(obj.osg.pum2,'Enable','on')
+                                set(obj.osg.pum3,'Enable','on')
                                 
                             else
                                 
@@ -1504,6 +1752,18 @@ classdef Treatment < handle
                                 else
                                     
                                     disp('Params file not found !')
+                                    
+                                    while ~exist([obj.data_path,'\Tmp\params.mat'],'file')
+                                        
+                                        pause(1)
+                                        
+                                        disp('Waiting for file !')
+                                        
+                                    end
+                                    
+                                    disp('Found params file !')
+                                    
+                                    movefile([obj.data_path,'\Tmp\params.mat'],new_data_dir_path);
                                     
                                 end
                                 
@@ -1545,11 +1805,15 @@ classdef Treatment < handle
                                 
                             end
                             
+                            obj.data_array(end).scan_obs_fit_type = obj.scan_obs.fit_type;
+                            
                             obj.data_array(end).scan_obs_y_axis = obj.scan_obs.y_axis;
                             
                             obj.update_scan_obs_plot;
                             
                             % update global observe
+                            
+                            obj.data_array(end).glob_obs_fit_type = obj.glob_obs.fit_type;
                             
                             obj.data_array(end).glob_obs_y_axis = obj.glob_obs.y_axis;
                             
@@ -1572,7 +1836,7 @@ classdef Treatment < handle
                                 % disable scan observe pop-up menu
                                 
                                 set(obj.osg.pum1,'Enable','off')
-                                
+                                set(obj.osg.pum2,'Enable','off')
                                 set(obj.osg.pum2,'Enable','off')
                                 
                             else
@@ -1633,15 +1897,19 @@ classdef Treatment < handle
                                     
                                     % enable scan observe buttons
                                         
-                                    set(obj.osg.but,'Enable','on')
+                                    set(obj.osg.but1,'Enable','on')
+                                    set(obj.osg.but2,'Enable','on')
                                     
                                     % enable global observe pop-up menu
                                     
                                     set(obj.gog.pum1,'Enable','on')
+                                    set(obj.gog.pum2,'Enable','on')
                                     
                                 end
                                 
                                 % update global observe
+                                
+                                obj.current_data.glob_obs_fit_type = obj.glob_obs.fit_type;
                                 
                                 obj.current_data.glob_obs_y_axis = obj.glob_obs.y_axis;
                                 
@@ -1753,11 +2021,13 @@ classdef Treatment < handle
                                         
                                         % enable scan observe buttons
                                         
-                                        set(obj.osg.but,'Enable','on')
+                                        set(obj.osg.but1,'Enable','on')
+                                        set(obj.osg.but2,'Enable','on')
                                         
                                         % enable global observe pop-up menu
                                         
                                         set(obj.gog.pum1,'Enable','on')
+                                        set(obj.gog.pum2,'Enable','on')
                                         
                                     end
                                     
@@ -1805,17 +2075,21 @@ classdef Treatment < handle
                                         
                                         % enable scan observe buttons
                                         
-                                        set(obj.osg.but,'Enable','on')
+                                        set(obj.osg.but1,'Enable','on')
+                                        set(obj.osg.but2,'Enable','on')
                                         
                                         % enable global observe pop-up menu
                                         
                                         set(obj.gog.pum1,'Enable','on')
+                                        set(obj.gog.pum2,'Enable','on')
                                         
                                     end
                                     
                                 end
                                 
                                 % update global observe
+                                
+                                obj.data_array(end).glob_obs_fit_type = obj.glob_obs.fit_type;
                                 
                                 obj.data_array(end).glob_obs_y_axis = obj.glob_obs.y_axis;
                                 
@@ -1840,45 +2114,55 @@ classdef Treatment < handle
         
         function set_obs_params_lists(obj,~,~)
             
+            % update fit-type list
+            
+            list_fit_type = {Fit.Default_parameters.fit_struct.type};
+            
+            ind1 = find(strcmp(obj.current_data.glob_obs_fit_type,list_fit_type));
+            
+            if isempty(ind1)
+                
+                ind1=1;
+                
+            end
+            
+            set(obj.gog.pum1,'String',list_fit_type,'Value',ind1);
+            
+            ind2 = find(strcmp(obj.current_data.scan_obs_fit_type,list_fit_type));
+            
+            if isempty(ind2)
+                
+                ind2=1;
+                
+            end
+            
+            set(obj.osg.pum2,'String',list_fit_type,'Value',ind2);
+            
             % update y-axis parameters list
             
-            delete([Treatment.Default_parameters.treatment_script_path,'\', ...
-                obj.current_data.camera_type,'\',obj.current_data.treatment_type,'\*.asv']);
+            list_y_axis_1 = Fit.Default_parameters.fit_struct(ind1).parameters;
             
-            tmp_struct = dir([Treatment.Default_parameters.treatment_script_path,'\', ...
-                obj.current_data.camera_type,'\',obj.current_data.treatment_type]);
+            ind3 = find(strcmp(obj.current_data.glob_obs_y_axis,list_y_axis_1));
             
-            tmp_list = {tmp_struct.name};
-            
-            list_y_axis = tmp_list{3:end};
-            
-            if iscell(list_y_axis)
+            if isempty(ind3)
                 
-                list_y_axis = cellfun(@(x) strtok(x,'.'),list_y_axis);
-                
-            else
-                
-                list_y_axis = strtok(list_y_axis,'.');
+                ind3=1;
                 
             end
             
-            set(obj.gog.pum1,'String',list_y_axis,'Value',1);
+            set(obj.gog.pum2,'String',list_y_axis_1,'Value',ind3);
             
-            set(obj.osg.pum2,'String',list_y_axis,'Value',1);
+            list_y_axis_2 = Fit.Default_parameters.fit_struct(ind2).parameters;
             
-            if iscell(list_y_axis)
+            ind4 = find(strcmp(obj.current_data.scan_obs_y_axis,list_y_axis_2));
+            
+            if isempty(ind4)
                 
-                obj.scan_obs.y_axis = list_y_axis{1};
-                
-                obj.glob_obs.y_axis = list_y_axis{1};
-                
-            else
-                
-                obj.scan_obs.y_axis = list_y_axis;
-                
-                obj.glob_obs.y_axis = list_y_axis;
+                ind4=1;
                 
             end
+            
+            set(obj.osg.pum3,'String',list_y_axis_2,'Value',ind4);
             
             % update x-axis parameters list
             
@@ -1892,17 +2176,32 @@ classdef Treatment < handle
                 
             end
             
-            set(obj.osg.pum1,'String',list_x_axis,'Value',1);
+            ind = find(strcmp(obj.current_data.scan_obs_x_axis,list_x_axis));
             
-            if iscell(list_x_axis)
+            if isempty(ind)
                 
-                obj.scan_obs.x_axis = list_x_axis{1};
+                ind=1;
+                
+            end
+            
+            set(obj.osg.pum1,'String',list_x_axis,'Value',ind);
+            
+            % update global scan_obs
+            
+            if isfield(obj.glob_obs,'values')
+                
+                obj.glob_obs = struct('fit_type',list_fit_type{ind1},...
+                    'y_axis',list_y_axis_1{ind3},'values',obj.glob_obs.values);
                 
             else
                 
-                obj.scan_obs.x_axis = list_x_axis;
+                obj.glob_obs = struct('fit_type',list_fit_type{ind1},...
+                    'y_axis',list_y_axis_1{ind3});
                 
             end
+
+            obj.scan_obs = struct('fit_type',list_fit_type{ind2},...
+                'y_axis',list_y_axis_2{ind4},'x_axis',list_x_axis{ind});
 
         end
         
@@ -1928,11 +2227,13 @@ classdef Treatment < handle
             
             if isfield(obj.glob_obs,'values')&&~isempty(obj.glob_obs.values)
                 
-                if ~strcmp(obj.glob_obs.y_axis,obj.current_data.glob_obs_y_axis)
+                if ~strcmp(obj.glob_obs.fit_type,obj.current_data.glob_obs_fit_type)||...
+                        ~strcmp(obj.glob_obs.y_axis,obj.current_data.glob_obs_y_axis)
                     
-                     obj.current_data.glob_obs_y_axis = obj.glob_obs.y_axis;
-                     
-                     obj.glob_obs.values = obj.current_data.glob_obs_y_axis_value;
+                    obj.current_data.glob_obs_fit_type = obj.glob_obs.fit_type;
+                    obj.current_data.glob_obs_y_axis = obj.glob_obs.y_axis;
+                    
+                    obj.glob_obs.values = obj.current_data.glob_obs_y_axis_value;
                     
                 end
                 
@@ -2006,13 +2307,20 @@ classdef Treatment < handle
             
             if ~isempty(obj.data_array)
                 
-                if isfield(obj.scan_obs,'x_axis')&&isfield(obj.scan_obs,'y_axis')
+                if isfield(obj.scan_obs,'x_axis')&&isfield(obj.scan_obs,'fit_type')&&isfield(obj.scan_obs,'y_axis')
                     
-                    if ~isempty(obj.scan_obs.x_axis)&&~isempty(obj.scan_obs.y_axis)
+                    if ~isempty(obj.scan_obs.x_axis)&&~isempty(obj.scan_obs.fit_type)&&~isempty(obj.scan_obs.y_axis)
                         
-                        if ~strcmp(obj.scan_obs.x_axis,obj.data_array(1).scan_obs_x_axis)
+                        if ~strcmp(obj.scan_obs.x_axis,obj.data_array(1).scan_obs_x_axis)||...
+                                ~strcmp(obj.scan_obs.fit_type,obj.data_array(1).scan_obs_fit_type)||...
+                                ~strcmp(obj.scan_obs.y_axis,obj.data_array(1).scan_obs_y_axis)
                             
                             for i=1:length(obj.data_array)
+                                
+                                disp(['Treat picture ',num2str(i),' !'])
+                                
+                                obj.data_array(i).pics.pic_props = obj.data_array(1).pics.pic_props;
+                                obj.data_array(i).pics.static_pic_props = obj.data_array(1).pics.static_pic_props;
                                 
                                 obj.data_array(i).scan_obs_x_axis = obj.scan_obs.x_axis;
                                 
@@ -2022,14 +2330,7 @@ classdef Treatment < handle
                                     
                                 end
                                 
-                            end
-                            
-                        end
-                        
-                        if ~strcmp(obj.scan_obs.y_axis,obj.data_array(1).scan_obs_y_axis)
-                            
-                            for i=1:length(obj.data_array)
-                                
+                                obj.data_array(i).scan_obs_fit_type = obj.scan_obs.fit_type;
                                 obj.data_array(i).scan_obs_y_axis = obj.scan_obs.y_axis;
                                 
                             end
@@ -2043,6 +2344,60 @@ classdef Treatment < handle
                 end
                 
             end
+            
+%             if ~isempty(obj.data_array)
+%                 
+%                 if isfield(obj.scan_obs,'x_axis')&&isfield(obj.scan_obs,'y_axis')
+%                     
+%                     if ~isempty(obj.scan_obs.x_axis)&&~isempty(obj.scan_obs.y_axis)
+%                         
+%                         if ~strcmp(obj.scan_obs.x_axis,obj.data_array(1).scan_obs_x_axis)
+%                             
+%                             for i=1:length(obj.data_array)
+%                                 
+%                                 obj.data_array(i).pics.pic_props = obj.data_array(1).pics.pic_props;
+%                                 obj.data_array(i).pics.static_pic_props = obj.data_array(1).pics.static_pic_props;
+%                                 
+%                                 obj.data_array(i).pics.tmp_pic_bg = [];
+%                                 obj.data_array(i).pics.tmp_pic_sig = [];
+%                                 obj.data_array(i).pics.tmp_pic_cor = [];
+%                                 
+%                                 obj.data_array(i).scan_obs_x_axis = obj.scan_obs.x_axis;
+%                                 
+%                                 if strcmp(obj.scan_obs.x_axis,'none')
+%                                     
+%                                     obj.data_array(i).scan_obs_x_axis_value = i;
+%                                     
+%                                 end
+%                                 
+%                             end
+%                             
+%                         end
+%                         
+%                         if ~strcmp(obj.scan_obs.y_axis,obj.data_array(1).scan_obs_y_axis)
+%                             
+%                             for i=1:length(obj.data_array)
+%                                 
+%                                 obj.data_array(i).pics.pic_props = obj.data_array(1).pics.pic_props;
+%                                 obj.data_array(i).pics.static_pic_props = obj.data_array(1).pics.static_pic_props;
+%                                 
+%                                 obj.data_array(i).pics.tmp_pic_bg = [];
+%                                 obj.data_array(i).pics.tmp_pic_sig = [];
+%                                 obj.data_array(i).pics.tmp_pic_cor = [];
+%                                 
+%                                 obj.data_array(i).scan_obs_y_axis = obj.scan_obs.y_axis;
+%                                 
+%                             end
+%                             
+%                         end
+%                         
+%                         obj.update_scan_obs_plot;
+%                         
+%                     end
+%                     
+%                 end
+%                 
+%             end
             
         end
         

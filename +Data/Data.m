@@ -29,8 +29,11 @@ classdef Data < handle
     properties (SetObservable = true)
         
         scan_obs_x_axis
+        
+        scan_obs_fit_type
         scan_obs_y_axis
         
+        glob_obs_fit_type
         glob_obs_y_axis
         
     end
@@ -46,7 +49,7 @@ classdef Data < handle
     
     properties
         
-        treat_struct % structure containing treated value 
+        fit_array % array containing the different fits of the data
         
     end
     
@@ -64,8 +67,10 @@ classdef Data < handle
             obj.get_pics(pics_path);
             
             addlistener(obj,'scan_obs_x_axis','PostSet',@obj.postset_scan_obs_x_axis);
+            addlistener(obj,'scan_obs_fit_type','PostSet',@obj.postset_scan_obs_fit_type);
             addlistener(obj,'scan_obs_y_axis','PostSet',@obj.postset_scan_obs_y_axis);
             
+            addlistener(obj,'glob_obs_fit_type','PostSet',@obj.postset_glob_obs_fit_type);
             addlistener(obj,'glob_obs_y_axis','PostSet',@obj.postset_glob_obs_y_axis);
             
             if exist([obj.pics_path,'\params.mat'],'file')
@@ -105,8 +110,45 @@ classdef Data < handle
                             obj.pics = Pixelfly.Absorption(pics_path);
                             
                             obj.pics.parent = obj;
+                            
+                        case 'clean_abs'
+                            
+                            obj.pics = Pixelfly.Clean_abs(pics_path);
+                            
+                            obj.pics.parent = obj;
 
                     end
+                    
+                case 'imagsource'
+                    
+                    switch obj.treatment_type
+                        
+                        case 'fluo_tof'
+                            
+                            obj.pics = ImagSource.Fluo_tof(pics_path);
+                            
+                            obj.pics.parent = obj;
+                            
+                        case 'fluo_1pix'
+                            
+                            obj.pics = ImagSource.Fluo_1pix(pics_path);
+                            
+                            obj.pics.parent = obj;
+                            
+                        case 'absorption'
+                            
+                            obj.pics = ImagSource.Absorption(pics_path);
+                            
+                            obj.pics.parent = obj;
+                            
+                        case 'clean_abs'
+                            
+                            obj.pics = ImagSource.Clean_abs(pics_path);
+                            
+                            obj.pics.parent = obj;
+
+                    end
+                  
                     
             end
             
@@ -138,73 +180,75 @@ classdef Data < handle
             
         end
         
-        function postset_scan_obs_y_axis(obj,~,~)
+        function postset_scan_obs_fit_type(obj,~,~)
             
-            addpath([Treatment.Default_parameters.treatment_script_path,'\', ...
-                obj.camera_type,'\',obj.treatment_type]);
-            
-            if ~isempty(obj.treat_struct)
+            if ~isempty(obj.fit_array)
                 
-                ind = find(strcmp({obj.treat_struct.name},obj.scan_obs_y_axis));
+                ind = find(strcmp({obj.fit_array.fit_name},obj.scan_obs_fit_type));
                 
                 if ~isempty(ind)
                     
-                    if isequal(obj.treat_struct(ind).props,obj.pics.pic_props)&&...
-                            isequal(obj.treat_struct(ind).static_props,obj.pics.static_pic_props)
+                    if ~(isequal(obj.fit_array(ind).pic_props,obj.pics.pic_props)&&...
+                             isequal(obj.fit_array(ind).static_pic_props,obj.pics.static_pic_props))
                         
-                        obj.scan_obs_y_axis_value = obj.treat_struct(ind).value;
-                        
-                    else
-                        
-                        obj.scan_obs_y_axis_value = eval([obj.scan_obs_y_axis,'(obj);']);
-                        
-                        obj.treat_struct(ind).value = obj.scan_obs_y_axis_value;
-                        
-                        obj.treat_struct(ind).props = obj.pics.pic_props;
-                        
-                        obj.treat_struct(ind).static_props = obj.pics.static_pic_props;
-                        
+                        eval(['obj.fit_array(ind) = Fit.generic_fit(obj,''',obj.scan_obs_fit_type,''');']);
+                         
                     end
                     
                 else
                     
-                    obj.scan_obs_y_axis_value = eval([obj.scan_obs_y_axis,'(obj);']);
-                    
-                    obj.treat_struct(end+1).name = obj.scan_obs_y_axis;
-                    
-                    obj.treat_struct(end+1).value = obj.scan_obs_y_axis_value;
-                    
-                    obj.treat_struct(end+1).props = obj.pics.pic_props;
-                    
-                    obj.treat_struct(end+1).static_props = obj.pics.static_pic_props;
+                    eval(['obj.fit_array(end+1) = Fit.generic_fit(obj,''',obj.scan_obs_fit_type,''');']);
                     
                 end
                 
             else
                 
-                obj.scan_obs_y_axis_value = eval([obj.scan_obs_y_axis,'(obj);']);
+                eval(['obj.fit_array = Fit.generic_fit(obj,''',obj.scan_obs_fit_type,''');']);
                 
-                obj.treat_struct = struct('name',obj.scan_obs_y_axis,'value',obj.scan_obs_y_axis_value,...
-                    'props',obj.pics.pic_props,'static_props',obj.pics.static_pic_props);
-
+            end
+            
+        end
+        
+        function postset_scan_obs_y_axis(obj,~,~)
+            
+            eval(['obj.scan_obs_y_axis_value = obj.fit_array(strcmp({obj.fit_array.fit_name},obj.scan_obs_fit_type)).fit.',...
+                obj.scan_obs_y_axis,';']);
+            
+        end
+        
+        function postset_glob_obs_fit_type(obj,~,~)
+            
+            if ~isempty(obj.fit_array)
+                
+                ind = find(strcmp({obj.fit_array.fit_name},obj.glob_obs_fit_type));
+                
+                if ~isempty(ind)
+                    
+                    if ~(isequal(obj.fit_array(ind).pic_props,obj.pics.pic_props)&&...
+                             isequal(obj.fit_array(ind).static_pic_props,obj.pics.static_pic_props))
+                        
+                        eval(['obj.fit_array(ind) = Fit.generic_fit(obj,',obj.glob_obs_fit_type,');']);
+                         
+                    end
+                    
+                else
+                    
+                    eval(['obj.fit_array(end+1) = Fit.generic_fit(obj,',obj.glob_obs_fit_type,');']);
+                    
+                end
+                
+            else
+                
+                eval(['obj.fit_array = Fit.generic_fit(obj,''',obj.glob_obs_fit_type,''');']);
+                
             end
             
         end
         
         function postset_glob_obs_y_axis(obj,~,~)
             
-            if strcmp(obj.glob_obs_y_axis,obj.scan_obs_y_axis)
-                
-                obj.glob_obs_y_axis_value = obj.scan_obs_y_axis_value;
-                
-            else
-                
-                addpath([Treatment.Default_parameters.treatment_script_path,'\', ...
-                    obj.camera_type,'\',obj.treatment_type]);
-                
-                obj.glob_obs_y_axis_value =eval([obj.glob_obs_y_axis,'(obj);']);
-                
-            end
+            eval(['obj.glob_obs_y_axis_value = obj.fit_array(strcmp({obj.fit_array.fit_name},obj.glob_obs_fit_type)).fit.',...
+                obj.glob_obs_y_axis,';']);
             
         end
         
@@ -240,9 +284,11 @@ classdef Data < handle
             end
             
             addlistener(data,'scan_obs_x_axis','PostSet',@data.postset_scan_obs_x_axis);
+            addlistener(data,'scan_obs_fit_type','PostSet',@data.postset_scan_obs_fit_type);
             addlistener(data,'scan_obs_y_axis','PostSet',@data.postset_scan_obs_y_axis);
             
             addlistener(data,'glob_obs_y_axis','PostSet',@data.postset_glob_obs_y_axis);
+            addlistener(data,'glob_obs_fit_type','PostSet',@data.postset_glob_obs_fit_type);
             
             obj = data;
             
